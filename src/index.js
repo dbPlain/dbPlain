@@ -2,8 +2,174 @@ var request = require('request');
 var express = require('express');
 var app = express();
 var bodyParser = require("body-parser");
+
 app.use(bodyParser.urlencoded({ extended: false }));
 
+
+
+
+var  options = {
+  url: 'http://admin:admin@'+ process.env.COUCHDB_URL+'/utente/10',
+  method: 'POST',
+  headers: {
+     'Content-Type': 'application/json',
+     'Accept-Charset': 'utf-8'
+     
+   },
+  body: {
+         "name": "nome",
+         "cognome": "cognome",
+         "eta":21,
+         "sesso": "no",
+         "codice-fiscale" : "AAAABBBB"
+        },
+  json: true
+};
+app.get('/insperson', function(req,res){
+  
+  
+  var  options = {
+    
+    url: 'http://admin:admin@'+ process.env.COUCHDB_URL+'/persona/'+req.query.numero,
+    method: 'PUT',
+    headers: {
+       'Content-Type': 'application/json',
+       'Accept-Charset': 'utf-8'
+       
+     },
+    body: {
+           "name": req.query.nome,
+           "cognome": req.query.cognome,
+           "eta":parseInt(req.query.eta),
+           "sesso": req.query.sesso,
+           "codice-fiscale" : req.query.codf
+          },
+    json: true
+  };
+request.put(options, (err, body) => {
+
+
+  if (err) {
+    res.send("no " +err)
+  }
+  //console.log(`Status: ${res.statusCode}`);
+  //res.write(response.statusCode.toString());
+   res.send("ok "+body.toJSON.toString+ req.query.numero)
+});
+
+})
+app.get('/selezionatutto', function(req,res){
+  //res.send('http://admin:admin@'+ process.env.COUCHDB_URL + " ----- " + process.env.INSTANCE)
+  request.get('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db+"/_all_docs?include_docs=true", function(error,result,body)
+  {
+
+     if(error)
+     {
+       console.log("errore")
+       res.send(error)
+     }
+     else{
+
+      console.log("ok")
+      res.send("ok" +result + body)
+     }
+  });
+})
+
+app.get('/conta', function(req,res){
+  //res.send('http://admin:admin@'+ process.env.COUCHDB_URL + " ----- " + process.env.INSTANCE)
+  request.get('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db+"/_count", function(error,result,body)
+  {
+
+     if(error)
+     {
+       console.log("errore")
+       res.send(error)
+     }
+     else{
+
+      console.log("ok")
+      res.send("ok" +result + body)
+     }
+  });
+})
+
+app.get('/creadb', function(req,res){
+  //res.send('http://admin:admin@'+ process.env.COUCHDB_URL + " ----- " + process.env.INSTANCE)
+  request.put('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db, function(error,body)
+  {
+
+     if(error)
+     {
+       console.log("errore")
+       res.send(error)
+     }
+     else{
+
+      console.log("ok")
+      res.send(body)
+     }
+  });
+})
+  app.get('/eliminadb', function(req,res){
+    //res.send('http://admin:admin@'+ process.env.COUCHDB_URL + " ----- " + process.env.INSTANCE)
+    console.log(req.query.db)
+    request.delete('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db, function(error,body)
+    {
+  
+       if(error)
+       {
+         console.log("errore")
+         res.send(error)
+       }
+       else{
+  
+        console.log("ok")
+        res.send(body)
+       }
+    });
+
+
+})
+ /* request({
+    url: 'http://admin:admin@'+ process.env.COUCHDB_URL,
+    
+    method: 'GET',
+  
+  }, function(error, response, body){
+    if(error) {
+      console.log(error + "AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
+      res.send(response.statusCode+"AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
+    } else {
+      res.send(response.statusCode+" "+body)
+      console.log(response.statusCode, body);
+    }
+  }); */
+
+
+app.get('prova', function (req, res) {
+     request({
+    url: 'http://admin:admin@'+ process.env.COUCHDB_URL+"/utente/4",
+    
+    method: 'POST',
+    
+    body: {
+        nome: "ciao",
+        cognome:"prova"
+         },
+    content_type: 'application/json',
+
+  
+  }, function(error, response, body){
+    if(error) {
+      console.log(error + "AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
+      res.send(response.statusCode+"AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
+    } else {
+      res.send(response.statusCode+" "+body)
+      console.log(response.statusCode, body);
+    }
+  }); 
+});
 app.get('/', function (req, res) {
   res.send('Sono il root!!!');
 });

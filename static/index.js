@@ -1,3 +1,25 @@
+
+var request = require('request');
+var bodyParser = require("body-parser");
+function myfunction()
+{   
+   
+    request.put('http://admin:admin@'+ process.env.COUCHDB_URL+"/prova", function(error,body)
+  {
+
+     if(error)
+     {
+       alert(error)
+       
+     }
+     else{
+
+      alert(body)
+      
+     }
+})
+}
+
 function check(){
     var x = getCookie('email');
     console.log(x);
@@ -21,3 +43,5 @@ function getCookie(name) {
     }
     return null;
 }
+
+

@@ -1,27 +1,39 @@
-<!--shortcut: "!" e invio per inizializzare la pagina HTML-->
 <!DOCTYPE html>
-<html lang="it">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript" src="index.js">
+    
+    </script>
+</head>
+<body>
+       
+
+    <h4>Login</h4> 
+
+    <form   class="form-signin" >
+ 
+       
+        <h1 class="mb-3">Loggati</h1>
+        <input id = "username"type="username" name="user" class="form-control" 
+            placeholder="Inserisci la tua email" required autofocus />
+        <input id = "pass" type="password" name="myPassword" class="form-control" 
+            placeholder="inserisci password" required />
+        <div class="mb-3">
+            <input type="checkbox" name="rememberMe" id="rmb" />
+            <label for="rmb">RicordaMI!</label>
+        </div>
+        <button onclick= "myfunction()" type="submit" class="btn btn-danger">Invia</button>
+
         
-        <link rel="stylesheet" href="./bootstrap/css/bootstrap.css" type="text/css"/>
-        <title>Esercitazione 1</title>
-        <!--<link rel="shortcut icon" href="./bootstrap/assets/img/favicons/android-chrome-192x192.png" type="image/x-icon" > =favicon: immagine accanto all'URL, per evitare errore network-->
-    
-        <script src="index.js" type="text/javascript"></script>
-    
-    </head>
-    <body class="text-center" onload="check()">
-        <h1>benvenuti a tutti!</h1>
-        <a class="btn btn-primary btn-lg" href="login.html" id="bho1">
-            Login
-        </a>
-        <a class="btn btn-primary btn-lg" id="bho2">
-            Registrazione
-        </a>
-        <a class="btn btn-primary btn-lg" href="login.html" id="bho3">
-            Continue Test
-        </a>
-    </body>
+    </form>
+   
+    <script>
+		$(document).ready(function(){})
+    </script>
+
+</body>
 </html>

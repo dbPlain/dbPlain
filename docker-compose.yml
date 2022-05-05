@@ -1,7 +1,18 @@
 version: '2'
 
 services:
-
+  couch-db:
+    image: couchdb
+    restart: always
+    ports:
+      - "5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=admin
+    volumes:
+        - ./dbdata:/opt/couchdb/data
+    networks:
+      - app-network
   nginx:
     image: nginx:latest
     container_name: reverse_proxy
@@ -30,6 +41,7 @@ services:
     ports:
       - "3000"
     environment:
+      - COUCHDB_URL=couch-db:5984
       - INSTANCE=node1
     networks:
       - app-network
@@ -45,6 +57,7 @@ services:
     ports:
       - "3000"
     environment:
+      - COUCHDB_URL=couch-db:5984
       - INSTANCE=node2
     networks:
       - app-network
