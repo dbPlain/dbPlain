@@ -1,6 +1,7 @@
 version: '2'
 
 services:
+
   couch-db:
     image: couchdb
     restart: always
@@ -13,12 +14,13 @@ services:
         - ./dbdata:/opt/couchdb/data
     networks:
       - app-network
+
   nginx:
     image: nginx:latest
     container_name: reverse_proxy
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/www/data/static
+      - ./nginx:/www/data/static
     links:
       - node1:node1
       - node2:node2
@@ -36,7 +38,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /usr/src/app
     volumes:
-      - ./src:/usr/src/app/src
+      - ./server:/usr/src/app/src
       - ./node_modules:/usr/src/app/node_modules 
     ports:
       - "3000"
@@ -52,7 +54,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /usr/src/app
     volumes:
-      - ./src:/usr/src/app/src
+      - ./server:/usr/src/app/src
       - ./node_modules:/usr/src/app/node_modules
     ports:
       - "3000"
