@@ -439,7 +439,7 @@ var server = app.listen(process.env.PORT, function () {
   console.log('Example app listening at http://%s:%s', host, port);
 });
 
-module.exports = app; // for testing
+module.exports = server; // for testing
 
 
 
