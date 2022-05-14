@@ -42,6 +42,8 @@ services:
     volumes:
       - ./server:/usr/src/app/src
       - ./node_modules:/usr/src/app/node_modules 
+    depends_on:
+      - "couch-db" 
     ports:
       - "3000"
     environment:
@@ -58,6 +60,8 @@ services:
     volumes:
       - ./server:/usr/src/app/src
       - ./node_modules:/usr/src/app/node_modules
+    depends_on:
+      - "couch-db"
     ports:
       - "3000"
     environment:
