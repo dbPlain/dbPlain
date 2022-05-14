@@ -10,7 +10,67 @@
     <title>dbPlain</title>
 </head>
 <body class="text-center">
+     <div id = "1"></div>
+     <div id = "2"></div>
+    <script>
+         var httpRequest = new XMLHttpRequest()
+         httpRequest.open("get", "http://localhost:8080/prova2" , true)
+         httpRequest.onload = function(){
+            var response = httpRequest.response
+            
+            var dati =  JSON.parse(response)
+            //document.getElementById("1").innerHTML = dati.rows
+            var lista = dati.rows
+            let list = document.getElementById("1");
+            lista.forEach((item) => {
 
+              let li = document.createElement("li");
+                li.innerText = item.table_name
+              list.appendChild(li);
+             });
+            console.log(response)
+
+            var table = document.createElement("table")
+            table.setAttribute("class", ".table-striped")
+            table.class = "red";
+
+            var tr = table.insertRow(0)
+            var th = document.createElement("th")
+            th.innerHTML="nome"
+            tr.appendChild(th)
+            var tr2 = table.insertRow(1)
+            var th2 = document.createElement("th")
+            th2.innerHTML="prova"
+            tr2.appendChild(th2)
+            var tr3 = table.insertRow(2)
+            var th3 = document.createElement("th")
+            th3.innerHTML="prova"
+            tr3.appendChild(th3)
+            document.getElementById("2").appendChild(table)
+
+
+
+         }
+        httpRequest.send()
+
+
+    </script>
+    <table class="table table-bordered" style=  "width:20% ; height:200px"><tr><th>porco</th></tr><tr><th>porco</th></tr></table>
+    <!DOCTYPE html>
+<html lang="en">
+
+
+  <div class="sidebar">
+    <a class="active" href="#home">Home</a>
+    <a href="#news">News</a>
+    <a href="#contact">Contact</a>
+    <a href="#about">About</a>
+  </div>
+
+</body>
+</html>
+
+   
     <h1>benvenuti a tutti!</h1>
     <a class="btn btn-primary btn-lg" href="login.html"> Login </a>
 

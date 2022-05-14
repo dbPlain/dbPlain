@@ -1,6 +1,10 @@
 var request = require('request');
 var express = require('express');
 var app = express();
+const { Pool, Client } = require("pg");
+
+
+
 
 var bodyParser = require("body-parser");
 const res = require('express/lib/response');
@@ -517,48 +521,24 @@ app.get('/prova', function(req, res) {
 app.get('/prova2',async(req, res) =>{
   
   
- 
-    var  options = {
-      url: 'http://admin:admin@'+"localhost:5984"+"/persona/_find",
-      
-      method: 'POST',
-     
-      body: {
-        
-        "selector": {
-          "name": "\"Paolo\""
-      },
-      "fields": ["sesso"],
-      "limit": 2,
-      "skip": 0
-      
-           },
-      timeout: 500000,
-      json : true
-          } 
-      
+  const pool = new Pool({
+    user: "postgres",
+    host: "postgres",
+    database: "prova",
+    password: "adminpass",
+    port: "5432"
+  });
+
+
+  pool.query("select table_name from information_schema.tables where table_schema = 'public'",function(err, res2){
+
+     res.send(res2)
+
+  })
     
-     request.get(options,  function (err,res, body)
-    {
-     
-      
-       if(err)
-       {
-         console.log(err)
-         res.send(" non fatto")
-       }
-       else{
-        
-        var dati2 = JSON.stringify(body)
-        var dati = JSON.parse(dati2)
        
-        console.log("ok" + res.body.bookmark + body)
-        res.send("fatto")
-        
-        
-       }
-    } 
-  )
+    
+  
     
      });
 
