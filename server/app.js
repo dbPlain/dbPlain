@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 var request = require('request');
 const { query } = require('express');
 const couchdb = require('nano')('http://admin:admin@'+ process.env.COUCHDB_URL+'')
+app.use(bodyParser.json())
 
 const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use("utente")
@@ -524,21 +525,74 @@ app.get('/prova2',async(req, res) =>{
   const pool = new Pool({
     user: "postgres",
     host: "postgres",
-    database: "prova",
+    database: "utente",
     password: "adminpass",
     port: "5432"
   });
 
 
   pool.query("select table_name from information_schema.tables where table_schema = 'public'",function(err, res2){
-
-     res.send(res2)
+    if (err) res.send(err)
+    else res.send(res2)
+     
 
   })
+})
+
+  app.post('/colonneTabella',async(req, res) =>{
+   
+  
+    const pool = new Pool({
+      user: "postgres",
+      host: "postgres",
+      database: "utente",
+      password: "adminpass",
+      port: "5432"
+    });
+  
+    var prova = JSON.stringify(req.body)
+    var prova2 = JSON.parse(prova)
+    pool.query("select column_name from information_schema.columns where table_name = '"+prova2.tabella+"'"  ,function(err, res2){
+  
+       res.send(res2)
+  
+    })
+      
     
        
     
   
     
      });
+
+     app.post('/selezionaDatiTabella',async(req, res) =>{
+
+     // var bodyrequest =  JSON.stringify(req) 
+      //var datirequest =  JSON.parse(bodyrequest)
+     // var c = datirequest.email
+  
+     /* const pool = new Pool({
+        user: "postgres",
+        host: "postgres",
+        database: "utente",
+        password: "adminpass",
+        port: "5432"
+      });*/
+  
+      var prova = JSON.stringify(req.body)
+      var prova2 = JSON.parse(prova)
+     res.send(prova +"")
+    
+     /* pool.query("select column_name from information_schema.columns where table_name = 'persona'",function(err, res2){
+    
+         res.send(res2)
+    
+      })*/
+        
+      
+         
+      
+    
+      
+       });
 
