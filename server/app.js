@@ -27,17 +27,15 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password != datirequest.confermapassword) res.send('errore pass diverse');
-	else {
-		await utente.insert({
-			_id: t + '',
-			username: datirequest.username,
-			password: datirequest.password,
-			email: datirequest.email,
-		});
+	if (datirequest.password == datirequest.confermapassword) res.send('errore pass diverse');
+	await utente.insert({
+		_id: t + '',
+		username: datirequest.username,
+		password: datirequest.password,
+		email: datirequest.email,
+	});
 
-		res.send('registrato id: ' + t);
-	}
+	res.redirect('/static/home/');
 });
 /* var prova3 =  JSON.stringify(req.body) 
   var dati =  JSON.parse(prova3)
@@ -77,7 +75,7 @@ app.post('/autenticazione', async (req, res) => {
 		} else {
 			if (body.bookmark == 'nil') res.send('<h4>CREDENZIALI ERRATE</h4>');
 			else {
-				res.redirect('static/home.html');
+				res.redirect('/static/home/');
 			}
 		}
 	});
@@ -437,7 +435,7 @@ app.get(
 	'/users/auth/google_oauth2',
 	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
 	function already_Authenticated(req, res) {
-		res.redirect('/static/home.html');
+		res.redirect('/static/home/');
 	}
 );
 
@@ -451,7 +449,7 @@ app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, funct
 		expire_time: Date.now() + data_from_google.exp * 1000,
 	};
 	res.cookie('googleLogin', info_utente, { httpOnly: true }); // set cookie
-	res.redirect('/static/home.html');
+	res.redirect('/static/home/');
 });
 
 app.get('/orario2', function (req, res) {
