@@ -37,7 +37,7 @@ services:
         environment:
             - POSTGRES_PASSWORD=adminpass
         ports:
-            - 5432:5432
+            - 5433:5433
        
         volumes:
             - ./volumes/postgres:/docker-entrypoint-initdb.d
@@ -90,6 +90,8 @@ services:
       - "couch-db" 
     ports:
       - "3000"
+    env_file:
+      - .env
     environment:
       - COUCHDB_URL=couch-db:5984
       - INSTANCE=node1
@@ -108,6 +110,8 @@ services:
       - "couch-db"
     ports:
       - "3000"
+    env_file:
+      - .env
     environment:
       - COUCHDB_URL=couch-db:5984
       - INSTANCE=node2
