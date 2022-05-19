@@ -470,26 +470,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                 document.getElementById("tabella").appendChild(tr)
 
 
-              /*  var httpRequest2 = new XMLHttpRequest()
-                httpRequest2.open("post", "http://localhost:8080/colonneTabella" , true)
-                httpRequest2.setRequestHeader("Content-Type", "application/json");
-                httpRequest2.onload = function(){
-                    var response2 = httpRequest2.response
-                    console.log("-------------!" + response2+"!-----------")
-                    var dati2 =  JSON.parse(response2)
-                    var lista2 = dati2.rows
-                    var tr = document.getElementById("testa")
-                    lista2.forEach((item) => {
-                      var th = document.createElement("th")
-                      th.setAttribute("name", "colonna")
-                      th.innerHTML=item.column_name
-                      tr.appendChild(th)
-                      
-                    
-                    })
-                   }
-                httpRequest2.send(JSON.stringify({ "tabella": aCampo.innerText }))
-             */
+              
                 var httpRequest3 = new XMLHttpRequest()
                 httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
                 httpRequest3.setRequestHeader("Content-Type", "application/json");
