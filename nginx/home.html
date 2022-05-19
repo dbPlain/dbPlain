@@ -10,12 +10,186 @@
     </script>
     <script src ="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js">
     </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+   
+   <script type="text/javascript">
+
+          var stop = false
+          var tabella=""
+
+           
+         
+           $(document).ready(function(){
+            
+            $("#popup-container").hide()
+            $("#popup-container2").hide()
+            var sidenavbar = "si"
+            $("#errorpop2").hide()
+           
+            $("#errorpop").hide()
+            $("#existpop").hide()
+            $("#show-popup-btn").click(function(){
+                
+              if(!stop){
+                stop = true
+                $("#popup-container").show()
+              }
+             })
+            $("#hamburger").click(function(){
+
+              if(sidenavbar == "si")
+              {
+                  sidenavbar = "no"
+                  $("#sidenav").hide()
+
+              }
+              else 
+              {  
+                sidenavbar = "si"
+                $("#sidenav").show()
+
+              }
+
+
+            })
+
+             $("#close-btn").click(function(){
+                 stop=false
+                $("#popup-container").hide()})
+
+             
+
+
+           })
+           
+
+           // insert riga 
+           function closeriga(){
+            
+            
+           
+            $("#popup-container2").hide()
+            $("#errorpop2").hide()
+            stop = false
+        
+           
+     
+             }
+           function okriga(){
+            
+            
+          if(true){
+            $("#popup-container2").hide()
+            $("#errorpop2").hide()
+            stop = false
+          }
+
+
+            
+   
+           }
+           function setTabella(nomeTabella){
+
+                 tabella= nomeTabella
+           }
+           function insertriga(){
+            
+            if(!stop)
+            {
+              stop = true
+              $("#nometab").remove()
+              
+              
+               $("#popup-container2").empty()
+               $("#popup-container2").append('<div id="close-btn2"><span>close</span></div><br/>')
+               $("#popup-container2").append('<span style="float:left">inserisci riga nella tabella '+tabella+' </span><br/>')
+              
+              $("#close-btn2").click(function(){
+                 stop=false
+                $("#popup-container2").hide()})
+              $("#testa").each(function(index,item){
+            
+              console.log(item +item.innerText)
+              var lista = item.innerText.split('\t')
+              console.log(lista)
+              lista.forEach(element => {
+                $("#popup-container2").append('<span> '+element+' </span><br/>')
+              $("#popup-container2").append('<input type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
+              });
+              
+              
+              })
+              $("#popup-container2").show()
+              
+              
+            
+            }
+            else
+            {
+              console.log("errore")
+            }
+   
+           }
+           
+           function poperrore(){
+            $("#existpop").hide()
+            $("#errorpop").show()
+           }
+           function popok(dati){
+             if($("#"+dati.DB + dati.HOST).length >0)
+             {  
+                $("#errorpop").hide()
+                $("#existpop").show()
+             }
+             else{
+               stop = false
+               $("#dropdown2").append('<a id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
+               $("#"+dati.DB + dati.HOST).click(function(){
+                $("#dropdown").remove()
+                $("#sidenav").append('<div class="dropdown-container" id="dropdown"></div>')
+                dropdowntabella(dati)})
+               $("#errorpop").hide()
+               $("#existpop").hide()
+               $("#popup-container").hide()
+            }
+           
+          }
+    </script>
    
 
     
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
+
+#close-btn{
+  float: right;
+}
+#popup-container{
+  position: absolute;
+  left: 25%;
+  top: 10%;
+  width: 35%;
+  height: 75%;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 0px 10px #ccc;
+}
+#close-btn2{
+  float: right;
+}
+#popup-container2{
+  position: absolute;
+  background-color: #ccc;
+  left: 25%;
+  top: 10%;
+  width: 45%;
+  padding: 20px;
+  border: 1px solid rgb(120, 100, 100);
+  
+}
 body {
   font-family: "Lato", sans-serif;
 }
@@ -52,9 +226,14 @@ body {
 .sidenav a:hover, .dropdown-btn:hover {
   color: #f1f1f1;
 }
-
 /* Main content */
+.main2 {
+  margin-left: 190px; /* Same as the width of the sidenav */
+  font-size: 20px; /* Increased text to enable scrolling */
+  padding: 0px 10px;
+}
 .main {
+ margin-top: 0px;
   margin-left: 200px; /* Same as the width of the sidenav */
   font-size: 20px; /* Increased text to enable scrolling */
   padding: 0px 10px;
@@ -75,7 +254,7 @@ body {
 
 /* Optional: Style the caret down icon */
 .fa-caret-down {
-  float: right;
+  float: center;
   padding-right: 8px;
 }
 
@@ -87,65 +266,186 @@ body {
 </style>
 </head>
 <body>
+ 
+  <div  class="container-fluid" id = "popup-container2">
+    <div id="close-btn2">
+       <span>close</span>
 
-<div class="sidenav">
+    </div>
+  
+  
+    
+    
+  </div>
+
+
+<div id = "popup-container">
+  <div id="close-btn">
+     <span>close</span>
+   
+  </div>
+
+  <h3 style="float:left">inserisci db</h3>
+  <form style="margin-top: 70px;" action="javascript:void(0);" name="login_form" class="form-signin" >
+   
+        
+        <span>HOST:</span>
+        <input type="text" name="hostDB" class="form-control"  id="hostDB"
+            placeholder="Inserisci l'host del tuo db" required autofocus /> <!-- name is required in una form (vedi su internet: differenza id e name) -->
+        <span>NOME DB:</span>
+        <input type="text" name="nomeDB" class="form-control" id="nomeDB"
+            placeholder="inserisci password" required />
+        <span>USER:</span>
+        <input type="text" name="userDB" class="form-control" id="userDB"
+            placeholder="inserisci password" required />
+        <span>PASSWORD:</span>
+        <input type="text" name="passwordDB" class="form-control" id="passwordDB"
+          placeholder="inserisci password" required />
+        <span>PORT:</span>
+        <input type="text" name="portdDB" class="form-control" id="portDB"
+            placeholder="inserisci " required />
+            
+       
+        <button onclick="Connessionedb(document.getElementById('hostDB').value,
+                                       document.getElementById('nomeDB').value,
+                                       document.getElementById('userDB').value,
+                                       document.getElementById('passwordDB').value,
+                                       document.getElementById('portDB').value)" 
+                                       style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">Connetti db</button>
+
+        <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
+        <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
+    </form>
+</div>
+
+<div  id="sidenav"class="sidenav">
   <a href="#about">About</a>
+  <a href="#contact">Search</a>
   <a href="#services">Services</a>
   <a href="#clients">Clients</a>
   <a href="#contact">Contact</a>
-  <button class="dropdown-btn">Tabelle 
+  
+  <button class="dropdown-btn">database 
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-container" id="dropdown2">
+    <a href="#" style="text-align:left;" id="show-popup-btn">+add-db</a>
+  </div>
+  <button id="droptabelle" class="dropdown-btn">Tabelle 
     <i class="fa fa-caret-down"></i>
   </button>
   <div class="dropdown-container" id="dropdown">
     
   </div>
-  <a href="#contact">Search</a>
+  
 </div>
-<div class ="container-fluid">
+
+<nav id="navbarprova"   style="width:100% !important;" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container-fluid">
+    <button id="hamburger"   class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">dbPlain</a>
+    
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+     
+      </ul>
+      
+    </div>
+    <button onclick="insertriga()" type="button" class="btn btn-success">inserisci nuova riga </button>
+</nav>
+
+    
+  
+
 <div id="dati2" class="main" style="display:none">
      
-    <table id="tabella" class="table table-bordered">
+    <table     id="tabella" class="table table-bordered">
       <thead id="head">
         <tr id = "testa">
         </tr>
       </thead>
       <tbody id="body">
-        
+         
       </tbody>
     </table>
   
 </div>
-</div>
+
+
+
 <script>
-/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
 
 
+// funzione per nuova connessione db 
+function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
+  
+  console.log("partito")
+  var datiDB = {"HOST" : hostDB, "DB" : nomeDB , "USER" : userDB, "PASS" : passwordDB, "PORT" : portDB }
+  
+ 
+
+
+  var richiesta =  new XMLHttpRequest()
+  richiesta.open("post", "http://localhost:8080/connessionedb" , true)
+  richiesta.setRequestHeader("Content-Type", "application/json");
+  richiesta.onload = function(nomeDB){
+           var response = richiesta.response  
+          
+           if (richiesta.response == "ok")
+           {
+                   
+
+                   var t =  datiDB
+                  
+                   popok(datiDB)  
+           }
+           else 
+           {       
+                  
+                   poperrore()
+                   
+           }
+
+             
+         }
+  richiesta.send(JSON.stringify(datiDB))
+}
+
+
+// loop per gestire i dropdown
 var dropdown = document.getElementsByClassName("dropdown-btn");
 var i;
 
 for (i = 0; i < dropdown.length; i++) {
   dropdown[i].addEventListener("click", function() {
+    //var stile = "top=10, left=10, width=250, height=200, status=no,location=no,menubar = no, menubar=no, toolbar=no scrollbars=no";
+    //window.open("./index.html", "", stile);
     this.classList.toggle("active");
     var dropdownContent = this.nextElementSibling;
+    if(dropdownContent != null){
     if (dropdownContent.style.display === "block") {
       dropdownContent.style.display = "none";
     } else {
       dropdownContent.style.display = "block";
     }
+   }
   });
 }
 
+//codice che gestice la costruzione dell'html in modo dinamico 
+//basandosi sulla connessione al db e la tabella selezionata
+function dropdowntabella(datiDataBase)
+{
 
-
-console.log("prova")
 var httpRequest = new XMLHttpRequest()
-         httpRequest.open("get", "http://localhost:8080/prova2" , true)
+httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
+httpRequest.setRequestHeader("Content-Type", "application/json");
          httpRequest.onload = function(){
             var response = httpRequest.response
-            console.log(response)   
+           
          var dati =  JSON.parse(response)
-         //console.log(response)
-         //console.log(response)
          var lista = dati.rows
          var drop = document.getElementById("dropdown")
          lista.forEach((item) => {
@@ -157,14 +457,20 @@ var httpRequest = new XMLHttpRequest()
               aCampo.innerHTML = item.table_name
               aCampo.addEventListener("click" , function(){
 
+                setTabella(item.table_name)
                 document.getElementById("testa").remove() 
                
                 var tr = document.createElement("tr")
                 tr.setAttribute("id", "testa")
                 document.getElementById("head").appendChild(tr)
+                
+                document.getElementById("body").remove() 
+                tr = document.createElement("tbody")
+                tr.setAttribute("id", "body")
+                document.getElementById("tabella").appendChild(tr)
 
 
-                var httpRequest2 = new XMLHttpRequest()
+              /*  var httpRequest2 = new XMLHttpRequest()
                 httpRequest2.open("post", "http://localhost:8080/colonneTabella" , true)
                 httpRequest2.setRequestHeader("Content-Type", "application/json");
                 httpRequest2.onload = function(){
@@ -178,30 +484,79 @@ var httpRequest = new XMLHttpRequest()
                       th.setAttribute("name", "colonna")
                       th.innerHTML=item.column_name
                       tr.appendChild(th)
-                      console.log("ciao")
+                      
                     
                     })
                    }
                 httpRequest2.send(JSON.stringify({ "tabella": aCampo.innerText }))
-
+             */
                 var httpRequest3 = new XMLHttpRequest()
-                httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabella" , true)
+                httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
                 httpRequest3.setRequestHeader("Content-Type", "application/json");
                 httpRequest3.onload = function(){
                     
                     var response3 = httpRequest3.response
-                    console.log("response 3" +response3)
+                 
                     var dati3 =  JSON.parse(response3)
                     var lista3 = dati3.rows
-                    var tr = document.getElementById("body")
-                   /* lista3.forEach((item) => {
-                      var th = document.createElement("th")
-                      th.innerHTML=item.column_name
-                      tr.appendChild(th)
+                    var tbody = document.getElementById("body")
+                    var tr = document.getElementById("testa")
+                    var t = 1 
+                    lista3.forEach((item) => {
                     
-                    })*/
+                    tr2 = document.createElement("tr")
+                      for  (var  key in item){
+                        if (t == 1 ){
+                        
+                        var th = document.createElement("th")
+                        th.setAttribute("name", "colonna")
+                        th.innerHTML=key
+                        tr.appendChild(th)
+                        
+                        th = document.createElement("th")
+                        th.innerHTML=item[key]
+                        tr2.appendChild(th)
+                        
+                        }
+                        else{
+                        th = document.createElement("th")
+                        th.innerHTML=item[key]
+                        tr2.appendChild(th)
+                        }
+                        
+                      } 
+                      t=2
+                      tbody.appendChild(tr2)
+                     
+                      //th.innerHTML=item.column_name
+                     // tr.appendChild(th)
+                    
+                    })
                    }
-                httpRequest3.send(JSON.stringify({ "tabella": aCampo.innerText }))
+                   
+                   
+                   setTimeout(function(){
+                    var tbody = document.getElementById("testa")
+                   var grandezza = tbody.offsetWidth 
+                   console.log(grandezza)
+                   var navbarlaterale = document.getElementById("sidenav")
+                   var grandezza2 = navbarlaterale.offsetWidth
+                   console.log(grandezza2)
+                   var variabile = (grandezza + grandezza2) 
+                   var nabvar = document.getElementById("navbarprova")
+                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   }, 200);
+                  
+                // dimensiona()
+                 
+                var risorsePost = {"HOST" : datiDataBase.HOST, 
+                                   "DB" : datiDataBase.DB,
+                                   "USER" : datiDataBase.USER, 
+                                   "PASS" : datiDataBase.PASS, 
+                                   "PORT" : datiDataBase.PORT,
+                                   "tabella": aCampo.innerText
+                                    }
+                httpRequest3.send(JSON.stringify(risorsePost))
                 
                 var divDati = document.getElementById("dati2")
                 divDati.style.display="block"
@@ -216,7 +571,8 @@ var httpRequest = new XMLHttpRequest()
              
 });
          }
-         httpRequest.send()
+         httpRequest.send(JSON.stringify(datiDataBase))
+}
 </script>
 
 </body>
