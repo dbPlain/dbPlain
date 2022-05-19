@@ -8,7 +8,10 @@ const { Pool, Client } = require("pg");
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
-const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
+var request = require('request');
+const { query } = require('express');
+const couchdb = require('nano')('http://admin:admin@'+ process.env.COUCHDB_URL+'')
+app.use(bodyParser.json())
 
 //const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use('utente');
@@ -278,7 +281,41 @@ app.get('/eliminadb', function (req, res) {
 	});
 });
 
-/* request({
+app.get('/creadb', function(req,res){
+  request.put('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db, function(error,body)
+  {
+
+     if(error)
+     {
+       console.log("errore")
+       res.send(error)
+     }
+     else{
+
+      console.log("ok")
+      res.send(body)
+     }
+  });
+})
+
+app.get('/eliminadb', function(req,res){
+  console.log(req.query.db)
+  request.delete('http://admin:admin@'+ process.env.COUCHDB_URL+"/"+req.query.db, function(error,body)
+  {
+    if(error)
+    {
+      console.log("errore")
+      res.send(error)
+    }
+    else{
+
+  
+    res.send(body)
+    }
+  });
+})
+
+ /* request({
     url: 'http://admin:admin@'+ process.env.COUCHDB_URL,
     
     method: 'GET',
@@ -460,17 +497,39 @@ app.get('/prova2',async(req, res) =>{
   const pool = new Pool({
     user: "postgres",
     host: "postgres",
-    database: "prova",
+    database: "utente",
     password: "adminpass",
     port: "5432"
   });
 
 
   pool.query("select table_name from information_schema.tables where table_schema = 'public'",function(err, res2){
-
-     res.send(res2)
+    if (err) res.send(err)
+    else res.send(res2)
+     
 
   })
+})
+
+  app.post('/colonneTabella',async(req, res) =>{
+   
+  
+    const pool = new Pool({
+      user: "postgres",
+      host: "postgres",
+      database: "utente",
+      password: "adminpass",
+      port: "5432"
+    });
+  
+    var prova = JSON.stringify(req.body)
+    var prova2 = JSON.parse(prova)
+    pool.query("select column_name from information_schema.columns where table_name = '"+prova2.tabella+"'"  ,function(err, res2){
+  
+       res.send(res2)
+  
+    })
+      
     
        
     
@@ -478,6 +537,124 @@ app.get('/prova2',async(req, res) =>{
     
      });
 
-		
-	
+     app.post('/selezionaDatiTabella',async(req, res) =>{
+
+    
+  
+        const pool = new Pool({
+        user: "postgres",
+        host: "postgres",
+        database: "utente",
+        password: "adminpass",
+        port: "5432"
+      });
+  
+      var prova = JSON.stringify(req.body)
+      var prova2 = JSON.parse(prova)
+      
+    
+      pool.query("select * from  " +prova2.tabella,function(err, res2){
+    
+         res.send(res2)
+      })
+       });
+
+       app.post('/connessionedb',async(req, res) =>{
+
+    
+  
+       /*const pool = new Pool({
+        user: "postgres",
+        host: "postgres",
+        database: "utente",
+        password: "adminpass",
+        port: "5432"
+      })*/
+      var prova = JSON.stringify(req.body)
+      var prova2 = JSON.parse(prova)
+    
+      const pool = new Pool({
+        user: prova2.USER,
+        host: prova2.HOST,
+        database: prova2.DB,
+        password: prova2.PASS,
+        port: prova2.PORT
+      })
+      //res.send(t)
+      pool.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
+        if (error) res.send("errore");
+        res.send("ok")
+      });
+     
+        
+    
+
+       
+  
+      
+      
+    
+      
+    
+        
+      
+       });
+
+     
+    
+         app.post('/selezionaDatiTabelladinamico',async(req, res) =>{
+    
+        
+      
+          var prova = JSON.stringify(req.body)
+          var prova2 = JSON.parse(prova)
+          const pool = new Pool({
+            user: prova2.USER,
+            host: prova2.HOST,
+            database: prova2.DB,
+            password: prova2.PASS,
+            port: prova2.PORT
+          })
+          /*const pool = new Pool({
+            user: "postgres",
+            host: "postgres",
+            database: "utente",
+            password: "adminpass",
+            port: "5432"
+          });*/
+          
+        
+          pool.query("select * from  " +prova2.tabella + " limit 20",function(err, res2){
+        
+             res.send(res2)
+          })
+           });
+
+           app.post('/tabelledb',async(req, res) =>{
+  
+            var prova = JSON.stringify(req.body)
+            var prova2 = JSON.parse(prova)
+            const pool = new Pool({
+              user: prova2.USER,
+              host: prova2.HOST,
+              database: prova2.DB,
+              password: prova2.PASS,
+              port: prova2.PORT
+            })
+            /*const pool = new Pool({
+              user: "postgres",
+              host: "postgres",
+              database: "utente",
+              password: "adminpass",
+              port: "5432"
+            });*/
+          
+            pool.query("select table_name from information_schema.tables where table_schema = 'public'",function(err, res2){
+              if (err) res.send(err)
+              else res.send(res2)})
+          })
+           
+    
+          
+    
 
