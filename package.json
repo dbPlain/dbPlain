@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,17 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
-    "mocha": "^10.0.0"
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "8.5.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^12.4.1",
+    "mocha": "^10.0.0",
+    "prettier": "2.6.2"
+  },
+  "lint-staged":{
+    "**/*.js":[
+      "npx prettier --write",
+      "npx eslint --fix"
+    ]
   }
 }
