@@ -1,3 +1,26 @@
+// al primo caricamento
+if ($('input.checkbox').is(':checked')) {
+	$('.signup-text').addClass('selezionato');
+	$('.login-text').removeClass('selezionato');
+} else {
+	$('.signup-text').removeClass('selezionato');
+	$('.login-text').addClass('selezionato');
+}
+// ogni volta che cambia la checkbox
+$('.checkbox:checkbox').on('change', function () {
+	if ($(this).is(':checked')) {
+		$('.signup-text').addClass('selezionato');
+		$('.login-text').removeClass('selezionato');
+	} else {
+		$('.signup-text').removeClass('selezionato');
+		$('.login-text').addClass('selezionato');
+	}
+});
+// const cb = document.querySelector('#reg-log');
+// console.log(cb.checked);
+
+/* ALTRO */
+
 function valida() {
 <<<<<<< HEAD:nginx/login.js
     
