@@ -17,9 +17,7 @@
 
           var stop = false
           var tabella=""
-
-           
-         
+          var infoDB ={}
            $(document).ready(function(){
             
             $("#popup-container").hide()
@@ -57,16 +55,13 @@
              $("#close-btn").click(function(){
                  stop=false
                 $("#popup-container").hide()})
-
-             
-
-
            })
            //inserti riga
+          
            function sendInsert()
            {
              
-            var json = '{"'+arguments[0]+'": "' + arguments[1]+'"'
+            var json = '{"'+arguments[1]+'": "' + arguments[0]+'"'
             for (var i = 2; i < arguments.length; i+=2){
               var element = arguments[i]
               var element2 = arguments[i+1]
@@ -78,19 +73,34 @@
               console.log(element)
 
              }
-             json = json +"}"
+             console.log(infoDB)
+             json = json + ',"HOST" : "'+ infoDB.HOST+'",'+
+                                   '"DB" : "'+ infoDB.DB+'",'+
+                                   '"USER" : "'+ infoDB.USER+'",'+
+                                   '"PASS" : "'+ infoDB.PASS+'",'+
+                                   '"PORT" : "'+ infoDB.PORT+'"}'
              console.log(json)
 
             
              var jsonO = JSON.parse(json)
-             
+             var richiestaInsert = new XMLHttpRequest()
+             richiestaInsert.open("post", "http://localhost:8080/insertriga" , true)
+             richiestaInsert.setRequestHeader("Content-Type", "application/json");
+             richiestaInsert.onload = function(){
 
-
-           
-            
-
-              
+              var response = richiestaInsert.response
+              if(response == "ok")
+              {
+                console.log("record inserito")
+              }
+              else 
+              {
+                console.log("errore, ricontrolla il formato dei dati inseriti" +response)
+              }
+             }
+             richiestaInsert.send(JSON.stringify(jsonO))
            }
+           
            // insert riga 
            function closeriga(){
             
@@ -111,10 +121,6 @@
             $("#errorpop2").hide()
             stop = false
           }
-
-
-            
-   
            }
            function setTabella(nomeTabella){
 
@@ -160,9 +166,7 @@
               
               })
               $("#popup-container2").show()
-              
-              
-            
+
             }
             else
             {
@@ -176,6 +180,8 @@
             $("#errorpop").show()
            }
            function popok(dati){
+             infoDB = dati
+            console.log(infoDB)
              if($("#"+dati.DB + dati.HOST).length >0)
              {  
                 $("#errorpop").hide()
@@ -426,7 +432,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
   
  
 
-
+  
   var richiesta =  new XMLHttpRequest()
   richiesta.open("post", "http://localhost:8080/connessionedb" , true)
   richiesta.setRequestHeader("Content-Type", "application/json");
@@ -436,7 +442,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
            if (richiesta.response == "ok")
            {
                    
-
+                     
                    var t =  datiDB
                   
                    popok(datiDB)  
@@ -451,6 +457,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
              
          }
   richiesta.send(JSON.stringify(datiDB))
+
 }
 
 
