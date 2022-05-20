@@ -62,8 +62,35 @@
 
 
            })
-           
+           //inserti riga
+           function sendInsert()
+           {
+             
+            var json = '{"'+arguments[0]+'": "' + arguments[1]+'"'
+            for (var i = 2; i < arguments.length; i+=2){
+              var element = arguments[i]
+              var element2 = arguments[i+1]
+              console.log(element2)
+              
+              
+                   
+              json =json+',"'+ element2+'": "' + element+'"'
+              console.log(element)
 
+             }
+             json = json +"}"
+             console.log(json)
+
+            
+             var jsonO = JSON.parse(json)
+             
+
+
+           
+            
+
+              
+           }
            // insert riga 
            function closeriga(){
             
@@ -106,18 +133,30 @@
                $("#popup-container2").append('<span style="float:left">inserisci riga nella tabella '+tabella+' </span><br/>')
               
               $("#close-btn2").click(function(){
+
                  stop=false
-                $("#popup-container2").hide()})
+                $("#popup-container2").hide()
+              
+              
+              })
               $("#testa").each(function(index,item){
             
               console.log(item +item.innerText)
               var lista = item.innerText.split('\t')
+              var elementifunz = "'"+tabella+"','tabella'"
+              "document.getElementById('hostDB').value"
               console.log(lista)
               lista.forEach(element => {
+                elementifunz = elementifunz+",document.getElementById('"+element+"').value,'"+element+"'"
+                
                 $("#popup-container2").append('<span> '+element+' </span><br/>')
               $("#popup-container2").append('<input type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
               });
               
+              console.log(elementifunz)
+              var stringa = '<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>'
+              console.log(stringa)
+              $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
               
               })
               $("#popup-container2").show()
@@ -312,6 +351,7 @@ body {
                                        document.getElementById('passwordDB').value,
                                        document.getElementById('portDB').value)" 
                                        style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">Connetti db</button>
+        
 
         <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
         <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
