@@ -1,77 +1,36 @@
-// al primo caricamento
-if ($('input.checkbox').is(':checked')) {
-	$('.signup-text').addClass('selezionato');
-	$('.login-text').removeClass('selezionato');
-} else {
-	$('.signup-text').removeClass('selezionato');
-	$('.login-text').addClass('selezionato');
-}
-// ogni volta che cambia la checkbox
-$('.checkbox:checkbox').on('change', function () {
-	if ($(this).is(':checked')) {
-		$('.signup-text').addClass('selezionato');
-		$('.login-text').removeClass('selezionato');
+// appena finisce di caricare il DOM
+// uguale a "$(document).ready(function()" deprecated
+$(function () {
+	// a inizio caricamento
+	if ($('input.checkbox').is(':checked')) {
+		// Underline signup/login
+		$('.signup-text').addClass('signup-checked');
+		$('.login-text').removeClass('login-checked');
+
+		// sinup/login text per cambiare form
+		$('#login-click').attr({ for: 'reg-log' });
+		$('#signup-click').removeAttr('for');
 	} else {
-		$('.signup-text').removeClass('selezionato');
-		$('.login-text').addClass('selezionato');
+		$('.signup-text').removeClass('signup-checked');
+		$('.login-text').addClass('login-checked');
+
+		$('#signup-click').attr({ for: 'reg-log' });
+		$('#login-click').removeAttr('for');
 	}
+	// ogni volta che cambia la checkbox (dinamicamente)
+	$('.checkbox:checkbox').on('change', function () {
+		if ($(this).is(':checked')) {
+			$('.signup-text').addClass('signup-checked');
+			$('.login-text').removeClass('login-checked');
+
+			$('#login-click').attr({ for: 'reg-log' });
+			$('#signup-click').removeAttr('for');
+		} else {
+			$('.signup-text').removeClass('signup-checked');
+			$('.login-text').addClass('login-checked');
+
+			$('#signup-click').attr({ for: 'reg-log' });
+			$('#login-click').removeAttr('for');
+		}
+	});
 });
-// const cb = document.querySelector('#reg-log');
-// console.log(cb.checked);
-
-/* ALTRO */
-
-function valida() {
-<<<<<<< HEAD:nginx/login.js
-    
-    if (document.getElementById("rmb").checked) {
-        alert("Hai scelto di essere ricordato come uno stronzo");
-    }
-    else {
-        alert("Hai scelto di essere scaricato");
-    }
-}
-
-=======
-	if (document.getElementById('rmb').checked) {
-		alert('Hai scelto di essere ricordato come uno stronzo');
-	} else {
-		alert('Hai scelto di essere scaricato');
-	}
-}
-
-/*function setCookie(name, value, options = {}) {
->>>>>>> dac1b7b151489eba12ed4a7a1143d2b8209596c3:nginx/login/index.js
-
-
-<<<<<<< HEAD:nginx/login.js
-
-function checkAuth() {
-    console.log("L'unica cosa utile da fare qui, è settare i cookie...")
-}
-
-
-
-function setCookie(name,value,days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value.value || "")  + expires + "; path=/";
-}
-=======
-// inserire httponly e :
-// " will be soon rejected because it has the “SameSite” attribute set to “None” or an invalid value, without the “secure” attribute.
-// To know more about the “SameSite“ attribute, read https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite "
-function setCookie(name, value, days) {
-	var expires = '';
-	if (days) {
-		var date = new Date();
-		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-		expires = '; expires=' + date.toUTCString();
-	}
-	document.cookie = name + '=' + (value.value || '') + expires + '; path=/';
-}
->>>>>>> dac1b7b151489eba12ed4a7a1143d2b8209596c3:nginx/login/index.js
