@@ -15,8 +15,13 @@
 </head>
 <body class="text-center">      
         
-	<a href="#" class="logo" target="_blank">
-		<img src="../assets/img/logo_dbplain_negativo.png" alt="">
+	<a href="/static/" class="logo" target="_blank">
+		<picture>
+			<source media="(max-width: 799px)" srcset="../assets/img/logo_dbplain_negativo.png">
+			<source media="(min-width: 800px)" srcset="../assets/img/logo+nome_dbplain_negativo.png">
+			<img src="../assets/img/logo+nome_dbplain_negativo.png" alt="Logo" style="max-width: 100%;">
+		</picture>
+		<!-- <img src="../assets/img/logo_dbplain_negativo.png" alt=""> -->
 	</a>
 
 	<div class="section">
@@ -24,9 +29,14 @@
 			<div class="row full-height justify-content-center">
 				<div class="col-12 text-center align-self-center py-5">
 					<div class="section pb-5 pt-5 pt-sm-2 text-center">
-						<h6 class="mb-0 pb-3"><span class="login-text"> <a>Log In</a>  </span><span class="signup-text"> <a>Sign Up</a> </span></h6>
-                            <input class="checkbox" type="checkbox" id="reg-log" name="reg-log"/>
-                            <label for="reg-log"></label>
+
+						<h6 class="mb-0 pb-3">
+							<label for="" id="login-click"> <span class="login-text"> <a>Log In</a>  </span> </label> 
+							<label for="" id="signup-click"> <span class="signup-text"> <a>Sign Up</a> </span> </label>
+						</h6>     
+						<input class="checkbox" type="checkbox" id="reg-log" name="reg-log"/>
+						<label for="reg-log"></label>
+
 						<div class="card-3d-wrap mx-auto">
 							<div class="card-3d-wrapper">
 								<div class="card-front">
