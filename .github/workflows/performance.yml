@@ -5,9 +5,10 @@ on:
     branches: [ main ]
     types: [ opened, reopened ]
 
-lighthouse:
-    runs-on: ubuntu-latest
-    steps:
+jobs:
+  lighthouse:
+      runs-on: ubuntu-latest
+      steps:
       - uses: actions/checkout@v3
       - name: Lighthouse
         uses: foo-software/lighthouse-check-action@master
