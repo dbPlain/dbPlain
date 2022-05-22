@@ -27,7 +27,7 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password == datirequest.confermapassword) res.send('errore pass diverse');
+	if (datirequest.password != datirequest.confermapassword) res.send	('errore pass diverse');
 	await utente.insert({
 		_id: t + '',
 		username: datirequest.username,
@@ -75,7 +75,10 @@ app.post('/autenticazione', async (req, res) => {
 		} else {
 			if (body.bookmark == 'nil') res.send('<h4>CREDENZIALI ERRATE</h4>');
 			else {
+			
+			    res.cookie("datiUtente",body)
 				res.redirect('/static/home/');
+				//res.send(body)
 			}
 		}
 	});
@@ -558,6 +561,7 @@ app.get('/prova2', async (req, res) => {
 		if (err) res.send(err);
 		else res.send(res2);
 	});
+	pool.end(function(err){console.log(err)})
 });
 
 app.post('/colonneTabella', async (req, res) => {
@@ -577,6 +581,7 @@ app.post('/colonneTabella', async (req, res) => {
 			res.send(res2);
 		}
 	);
+	pool.end(function(err){console.log(err)})
 });
 
 app.post('/selezionaDatiTabella', async (req, res) => {
@@ -594,6 +599,7 @@ app.post('/selezionaDatiTabella', async (req, res) => {
 	pool.query('select * from  ' + prova2.tabella, function (err, res2) {
 		res.send(res2);
 	});
+	pool.end(function(err){console.log(err)})
 });
 
 app.post('/connessionedb', async (req, res) => {
@@ -616,9 +622,15 @@ app.post('/connessionedb', async (req, res) => {
 	});
 	//res.send(t)
 	pool.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
-		if (error) res.send('errore');
+		if (error){
+			res.send('errore');
+			pool.end(function(err){console.log(err)})
+	        return
+		} 
 		res.send('ok');
 	});
+	pool.end(function(err){console.log(err)})
+	return
 });
 
 app.post('/selezionaDatiTabelladinamico', async (req, res) => {
@@ -639,9 +651,10 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
             port: "5432"
           });*/
 
-	pool.query('select * from  ' + prova2.tabella + ' limit 20', function (err, res2) {
+	pool.query('select * from  ' + prova2.tabella + ' limit 100', function (err, res2) {
 		res.send(res2);
 	});
+	pool.end(function(err){console.log(err)})
 });
 
 app.post('/tabelledb', async (req, res) => {
@@ -663,7 +676,100 @@ app.post('/tabelledb', async (req, res) => {
             });*/
 
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) res.send(err);
+		if (err) {
+			res.send(err);
+			pool.end(function(err){console.log(err)})
+			return
+		}
 		else res.send(res2);
 	});
+    pool.end(function(err){console.log(err)})
+	return
 });
+
+app.post('/tabelledb', async (req, res) => {
+	var prova = JSON.stringify(req.body);
+	var prova2 = JSON.parse(prova);
+	const pool = new Pool({
+		user: prova2.USER,
+		host: prova2.HOST,
+		database: prova2.DB,
+		password: prova2.PASS,
+		port: prova2.PORT,
+	});
+
+
+	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
+		if (err){ 
+			res.send(err);
+			pool.end(function(err){console.log(err)})
+			return
+		 
+		}
+		else res.send(res2);
+	});
+	pool.end(function(err){console.log(err)})
+	return
+});
+
+app.post('/insertriga', async (req, res) => {
+	
+	var prova = JSON.stringify(req.body);
+	var prova2 = JSON.parse(prova);
+	  const pool = new Pool({
+		user: prova2.USER,
+		host: prova2.HOST,
+		database: prova2.DB,
+		password: prova2.PASS,
+		port: prova2.PORT,
+	});
+	var campi=""
+	var valori = ""
+	var pass = 0
+	var out = ""
+	for  (var  key in prova2){
+	  var key2 = toString(key)
+	  
+      if(key != "HOST" && key != "DB" && key != "PORT" && key != "PASS" && key != "USER"){
+       if (pass < 2 ){
+		if (pass == 1 ){
+		    
+			campi = campi + key 
+			valori = valori + "'"+prova2[key] + "'"
+		  
+		}
+		  pass++
+		   
+
+        } 
+		else{
+			campi = campi +", "+ key 
+			valori = valori +", '"+ prova2[key] +"'"
+		}
+	  }
+		
+	} 
+   var query =  "INSERT INTO "+prova2.tabella+"("+campi+")" +
+		"VALUES" +"("+valori+");"+out
+	//res.send(query)
+	 pool.query(query,async (error)=> {
+		if (error) 
+		{ 
+	      pool.end(function(err){console.log(err)})
+		  res.send(error);
+		  return
+		}
+		
+		res.send("ok");
+		
+		
+	});
+
+
+
+	pool.end(function(err){console.log(err)})
+	return
+	
+
+
+})
