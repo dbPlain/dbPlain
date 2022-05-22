@@ -25,7 +25,11 @@
           
           var datiUtente = JSON.parse(provasub).docs[0]
           console.log(datiUtente.username + " "+  datiUtente.password +  " " + datiUtente.email , datiUtente.listaDB)
-          Connessionedb()
+         if(datiUtente.listaDB != undefined){
+          datiUtente.listaDB.forEach( datidbcookie =>{
+          Connessionedb(datidbcookie.HOST, datidbcookie.DB , datidbcookie.USER , datidbcookie.PASS, datidbcookie.PORT)
+          })
+        }
           start = false
           
           
@@ -34,6 +38,7 @@
           var infoDB ={}
           
            $(document).ready(function(){
+            $("#droptabelle").hide()
             $("#popupdierrore").hide()
             $("#popup-container").hide()
             $("#popup-container2").hide()
@@ -42,6 +47,7 @@
            
             $("#errorpop").hide()
             $("#existpop").hide()
+            document.getElementById("dropdowndb-btn").click()
             $("#show-popup-btn").click(function(){
               $("#popupdierrore").hide()
               if(!stop){
@@ -237,11 +243,14 @@
            }
            
            function poperrore(){
+             
             $("#existpop").hide()
             $("#errorpop").show()
+             
            }
            function popok(dati){
              infoDB = dati
+             $("#droptabelle").show()
             console.log(infoDB)
              if($("#"+dati.DB + dati.HOST).length >0)
              {  
@@ -261,18 +270,18 @@
             }
            
           }
-          function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
+function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
   
   console.log("partito")
   var datiDB = {"HOST" : hostDB, "DB" : nomeDB , "USER" : userDB, "PASS" : passwordDB, "PORT" : portDB }
-  
+  console.log(datiDB)
  
 
   
-  var richiesta =  new XMLHttpRequest()
-  richiesta.open("post", "http://localhost:8080/connessionedb" , true)
-  richiesta.setRequestHeader("Content-Type", "application/json");
-  richiesta.onload = function(nomeDB){
+          var richiesta =  new XMLHttpRequest()
+          richiesta.open("post", "http://localhost:8080/connessionedb" , true)
+          richiesta.setRequestHeader("Content-Type", "application/json");
+          richiesta.onload = function(nomeDB){
            var response = richiesta.response  
           
            if (richiesta.response == "ok")
@@ -284,9 +293,12 @@
                    popok(datiDB)  
            }
            else 
-           {       
+           {      if(!start)
+                 { 
                   
                    poperrore()
+                 }
+                 
                    
            }
 
@@ -613,7 +625,7 @@ body {
   <a href="#clients">Clients</a>
   <a href="#contact">Contact</a>
   
-  <button class="dropdown-btn">database 
+  <button id="dropdowndb-btn" class="dropdown-btn">database 
     <i class="fa fa-caret-down"></i>
   </button>
   <div class="dropdown-container" id="dropdown2">

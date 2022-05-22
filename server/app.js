@@ -622,10 +622,15 @@ app.post('/connessionedb', async (req, res) => {
 	});
 	//res.send(t)
 	pool.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
-		if (error) res.send('errore');
+		if (error){
+			res.send('errore');
+			pool.end(function(err){console.log(err)})
+	        return
+		} 
 		res.send('ok');
 	});
 	pool.end(function(err){console.log(err)})
+	return
 });
 
 app.post('/selezionaDatiTabelladinamico', async (req, res) => {
