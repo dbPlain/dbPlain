@@ -27,7 +27,7 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password == datirequest.confermapassword) res.send('errore pass diverse');
+	if (datirequest.password != datirequest.confermapassword) res.send	('errore pass diverse');
 	await utente.insert({
 		_id: t + '',
 		username: datirequest.username,
@@ -75,7 +75,10 @@ app.post('/autenticazione', async (req, res) => {
 		} else {
 			if (body.bookmark == 'nil') res.send('<h4>CREDENZIALI ERRATE</h4>');
 			else {
+			
+			    res.cookie("datiUtente",body)
 				res.redirect('/static/home/');
+				//res.send(body)
 			}
 		}
 	});
@@ -643,7 +646,7 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
             port: "5432"
           });*/
 
-	pool.query('select * from  ' + prova2.tabella + ' limit 20', function (err, res2) {
+	pool.query('select * from  ' + prova2.tabella + ' limit 100', function (err, res2) {
 		res.send(res2);
 	});
 	pool.end(function(err){console.log(err)})
@@ -668,10 +671,15 @@ app.post('/tabelledb', async (req, res) => {
             });*/
 
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) res.send(err);
+		if (err) {
+			res.send(err);
+			pool.end(function(err){console.log(err)})
+			return
+		}
 		else res.send(res2);
 	});
     pool.end(function(err){console.log(err)})
+	return
 });
 
 app.post('/tabelledb', async (req, res) => {
@@ -687,10 +695,16 @@ app.post('/tabelledb', async (req, res) => {
 
 
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) res.send(err);
+		if (err){ 
+			res.send(err);
+			pool.end(function(err){console.log(err)})
+			return
+		 
+		}
 		else res.send(res2);
 	});
 	pool.end(function(err){console.log(err)})
+	return
 });
 
 app.post('/insertriga', async (req, res) => {
@@ -748,7 +762,7 @@ app.post('/insertriga', async (req, res) => {
 
 
 
-	
+	pool.end(function(err){console.log(err)})
 	return
 	
 
