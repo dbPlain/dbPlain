@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="index.css" />
     <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
@@ -18,19 +18,23 @@
       
      
     //return null;
+    
           var start = true 
           let prova = decodeURIComponent(document.cookie)
           var provasub = prova.substring(prova.indexOf("{"),prova.length)
-          console.log(provasub)
+        
           
           var datiUtente = JSON.parse(provasub).docs[0]
-          console.log(datiUtente.username + " "+  datiUtente.password +  " " + datiUtente.email , datiUtente.listaDB)
+          console.log(datiUtente)
+          
          if(datiUtente.listaDB != undefined){
           datiUtente.listaDB.forEach( datidbcookie =>{
-          Connessionedb(datidbcookie.HOST, datidbcookie.DB , datidbcookie.USER , datidbcookie.PASS, datidbcookie.PORT)
-          })
-        }
-          start = false
+           
+            
+            Connessionedb(datidbcookie.HOST, datidbcookie.DB , datidbcookie.USER , datidbcookie.PASS, datidbcookie.PORT)
+    
+        })}
+          
           
           
           var stop = false
@@ -38,6 +42,7 @@
           var infoDB ={}
           
            $(document).ready(function(){
+             
             $("#droptabelle").hide()
             $("#popupdierrore").hide()
             $("#popup-container").hide()
@@ -49,6 +54,7 @@
             $("#existpop").hide()
             document.getElementById("dropdowndb-btn").click()
             $("#show-popup-btn").click(function(){
+              start = false
               $("#popupdierrore").hide()
               if(!stop){
                 stop = true
@@ -208,7 +214,7 @@
               })
               $("#testa").each(function(index,item){
             
-              console.log(item +item.innerText)
+             
               var lista = item.innerText.split('\t')
               var elementifunz = "'"+tabella+"','tabella'"
               "document.getElementById('hostDB').value"
@@ -251,16 +257,20 @@
            function popok(dati){
              infoDB = dati
              $("#droptabelle").show()
-            console.log(infoDB)
+            
              if($("#"+dati.DB + dati.HOST).length >0)
-             {  
+             {  if(!start){
                 $("#errorpop").hide()
                 $("#existpop").show()
+              }
              }
              else{
+              
                stop = false
-               $("#dropdown2").append('<a id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
+               $("#dropdown2").append('<a name='+dati+' id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
                $("#"+dati.DB + dati.HOST).click(function(){
+                infoDB = dati
+                 
                 $("#dropdown").remove()
                 $("#sidenav").append('<div class="dropdown-container" id="dropdown"></div>')
                 dropdowntabella(dati)})
@@ -272,25 +282,52 @@
           }
 function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
   
-  console.log("partito")
-  var datiDB = {"HOST" : hostDB, "DB" : nomeDB , "USER" : userDB, "PASS" : passwordDB, "PORT" : portDB }
-  console.log(datiDB)
- 
 
+  var datiDB = {"HOST" : hostDB, "DB" : nomeDB , "USER" : userDB, "PASS" : passwordDB, "PORT" : portDB }
   
+ 
+          var aggiungi = true
+          let prova = decodeURIComponent(document.cookie)
+          var provasub = prova.substring(prova.indexOf("{"),prova.length)
+          var datiU = JSON.parse(provasub).docs[0].listaDB
+          console.log(datiU)
+          if(datiU != undefined) datiU.forEach(element=>{if(element.HOST == datiDB.HOST && element.PASS == datiDB.PASS && element.DB == datiDB.DB) aggiungi = false})
+          
           var richiesta =  new XMLHttpRequest()
+        
           richiesta.open("post", "http://localhost:8080/connessionedb" , true)
           richiesta.setRequestHeader("Content-Type", "application/json");
           richiesta.onload = function(nomeDB){
            var response = richiesta.response  
           
            if (richiesta.response == "ok")
-           {
+           {     
+                 console.log(start)
+                 if(!start){
+                    console.log("dentro")
                    
-                     
-                   var t =  datiDB
+                   var richiestaSalvataggioDB =  new XMLHttpRequest()
+                   richiestaSalvataggioDB.open("post", "http://localhost:8080/updatedbutente" , true)
+                   richiestaSalvataggioDB.setRequestHeader("Content-Type", "application/json");
+                   richiestaSalvataggioDB.onload = function(nomeDB){  
+                    
+                    if (richiestaSalvataggioDB.response == "ok")
+                    {
+                      popok(datiDB)  
+                    
+                    }
+                    else
+                    {      console.log(richiestaSalvataggioDB.response)
+                           poperrore()
+                          
+                   }
+                  }
+                   richiestaSalvataggioDB.send(JSON.stringify({"aggiungi" : aggiungi ,"username" : datiUtente.username , "password" : datiUtente.password , "db" : datiDB}))
+                }
+                else{
                   
-                   popok(datiDB)  
+                  console.log("fuori")
+                  popok(datiDB)  }
            }
            else 
            {      if(!start)
@@ -310,7 +347,18 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
 
 
 // loop per gestire i dropdown
+function eliminaRow(id)
+{
+  console.log("elimina" + id)
+  $("#row"+id).each(function(index,item){ console.log(index + " "+ item)
+  var lista = item.innerText.split('\t')
+  listacut = lista.slice(1)
+  console.log(listacut)
 
+  })
+  $("#row"+id).remove()
+  
+}
 
 //codice che gestice la costruzione dell'html in modo dinamico 
 //basandosi sulla connessione al db e la tabella selezionata
@@ -335,6 +383,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               aCampo.innerHTML = item.table_name
               aCampo.addEventListener("click" , function(){
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
+                
                 setTabella(item.table_name)
                 document.getElementById("testa").remove() 
                
@@ -348,26 +397,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                 document.getElementById("tabella").appendChild(tr)
 
 
-              /*  var httpRequest2 = new XMLHttpRequest()
-                httpRequest2.open("post", "http://localhost:8080/colonneTabella" , true)
-                httpRequest2.setRequestHeader("Content-Type", "application/json");
-                httpRequest2.onload = function(){
-                    var response2 = httpRequest2.response
-                    console.log("-------------!" + response2+"!-----------")
-                    var dati2 =  JSON.parse(response2)
-                    var lista2 = dati2.rows
-                    var tr = document.getElementById("testa")
-                    lista2.forEach((item) => {
-                      var th = document.createElement("th")
-                      th.setAttribute("name", "colonna")
-                      th.innerHTML=item.column_name
-                      tr.appendChild(th)
-                      
-                    
-                    })
-                   }
-                httpRequest2.send(JSON.stringify({ "tabella": aCampo.innerText }))
-             */
+     
                 var httpRequest3 = new XMLHttpRequest()
                 httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
                 httpRequest3.setRequestHeader("Content-Type", "application/json");
@@ -380,27 +410,59 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                     var tbody = document.getElementById("body")
                     var tr = document.getElementById("testa")
                     var t = 1 
+                    var contatore = 0
+                    
                     lista3.forEach((item) => {
                     
                     tr2 = document.createElement("tr")
-                    
+                    tr2.setAttribute("id", "row"+contatore)
+                    contatore++
+                    var t2 = 1  
+
+                      if (t == 1){
+                        var th = document.createElement("th")
+                        th.innerHTML=""
+                        tr.appendChild(th)
+                        console.log()
+                       }
                       for  (var  key in item){
+                        
                         if (t == 1 ){
                         
                         var th = document.createElement("th")
                         th.setAttribute("name", "colonna")
                         th.innerHTML=key
                         tr.appendChild(th)
-                        
+                        if (t2 == 1 ){
+                             var temp = contatore-1
+                             th = document.createElement("th")
+                             th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red'class='bi bi-trash'></span>"
+                             tr2.appendChild(th)
+                             t2 = 2
+                             
+                          }
                         th = document.createElement("th")
                         th.innerHTML=item[key]
                         tr2.appendChild(th)
                         
                         }
                         else{
-                        th = document.createElement("th")
-                        th.innerHTML=item[key]
-                        tr2.appendChild(th)
+                          if (t2 == 1 ){
+                             th = document.createElement("th")
+                             var temp = contatore-1
+                             th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red' class='bi bi-trash'></span>"
+                             tr2.appendChild(th)
+                             th = document.createElement("th")
+                             th.innerHTML=item[key]
+                             tr2.appendChild(th)
+                            t2 = 2
+                          }
+                          else
+                          {
+                             th = document.createElement("th")
+                             th.innerHTML=item[key]
+                             tr2.appendChild(th)
+                          }
                         }
                         
                       } 
@@ -424,7 +486,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                    var variabile = (grandezza + grandezza2) 
                    var nabvar = document.getElementById("navbarprova")
                    nabvar.setAttribute("style", "width:"+variabile +"px !important;")
-                   }, 200);
+                   }, 100);
                   
                 // dimensiona()
                  
@@ -654,9 +716,8 @@ body {
       
     </div>
     <button onclick="insertriga()" type="button" class="btn btn-success">inserisci nuova riga </button>
-</nav>
-
-
+    
+  </nav>
 
 <div id="dati2" class="main" style="display:none">
      
@@ -714,124 +775,7 @@ for (i = 0; i < dropdown.length; i++) {
 
 //codice che gestice la costruzione dell'html in modo dinamico 
 //basandosi sulla connessione al db e la tabella selezionata
-function dropdowntabella(datiDataBase)
-{
 
-var httpRequest = new XMLHttpRequest()
-httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
-httpRequest.setRequestHeader("Content-Type", "application/json");
-         httpRequest.onload = function(){
-            var response = httpRequest.response
-           
-         var dati =  JSON.parse(response)
-         var lista = dati.rows
-         var drop = document.getElementById("dropdown")
-         lista.forEach((item) => {
-              
-              
-              let tabella = document.getElementById("body")
-              let aCampo = document.createElement("a");
-              aCampo.setAttribute("href","#")//"showtabella.html?nometabella="+item.table_name)
-              aCampo.innerHTML = item.table_name
-              aCampo.addEventListener("click" , function(){
-
-                setTabella(item.table_name)
-                document.getElementById("testa").remove() 
-               
-                var tr = document.createElement("tr")
-                tr.setAttribute("id", "testa")
-                document.getElementById("head").appendChild(tr)
-                
-                document.getElementById("body").remove() 
-                tr = document.createElement("tbody")
-                tr.setAttribute("id", "body")
-                document.getElementById("tabella").appendChild(tr)
-
-
-              
-                var httpRequest3 = new XMLHttpRequest()
-                httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
-                httpRequest3.setRequestHeader("Content-Type", "application/json");
-                httpRequest3.onload = function(){
-                    
-                    var response3 = httpRequest3.response
-                 
-                    var dati3 =  JSON.parse(response3)
-                    var lista3 = dati3.rows
-                    var tbody = document.getElementById("body")
-                    var tr = document.getElementById("testa")
-                    var t = 1 
-                    lista3.forEach((item) => {
-                    
-                    tr2 = document.createElement("tr")
-                      for  (var  key in item){
-                        if (t == 1 ){
-                        
-                        var th = document.createElement("th")
-                        th.setAttribute("name", "colonna")
-                        th.innerHTML=key
-                        tr.appendChild(th)
-                        
-                        th = document.createElement("th")
-                        th.innerHTML=item[key]
-                        tr2.appendChild(th)
-                        
-                        }
-                        else{
-                        th = document.createElement("th")
-                        th.innerHTML=item[key]
-                        tr2.appendChild(th)
-                        }
-                        
-                      } 
-                      t=2
-                      tbody.appendChild(tr2)
-                     
-                      //th.innerHTML=item.column_name
-                     // tr.appendChild(th)
-                    
-                    })
-                   }
-                   
-                   
-                   setTimeout(function(){
-                    var tbody = document.getElementById("testa")
-                   var grandezza = tbody.offsetWidth 
-                   console.log(grandezza)
-                   var navbarlaterale = document.getElementById("sidenav")
-                   var grandezza2 = navbarlaterale.offsetWidth
-                   console.log(grandezza2)
-                   var variabile = (grandezza + grandezza2) 
-                   var nabvar = document.getElementById("navbarprova")
-                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
-                   }, 200);
-                  
-                // dimensiona()
-                 
-                var risorsePost = {"HOST" : datiDataBase.HOST, 
-                                   "DB" : datiDataBase.DB,
-                                   "USER" : datiDataBase.USER, 
-                                   "PASS" : datiDataBase.PASS, 
-                                   "PORT" : datiDataBase.PORT,
-                                   "tabella": aCampo.innerText
-                                    }
-                httpRequest3.send(JSON.stringify(risorsePost))
-                
-                var divDati = document.getElementById("dati2")
-                divDati.style.display="block"
-         
-              
-              
-
-
-
-              })
-              drop.appendChild(aCampo)
-             
-});
-         }
-         httpRequest.send(JSON.stringify(datiDataBase))
-}
 </script>
 
 </body>

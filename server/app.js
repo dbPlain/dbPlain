@@ -59,6 +59,13 @@ app.post('/registrazione', async (req, res) => {
       } 
       
     }*/
+app.post('/updatecookie', async (req, res) => {
+  res.cookie("datiUtente",{"errore" : false})
+  res.redirect('/static/login/');
+
+})
+
+
 
 app.post('/autenticazione', async (req, res) => {
 	var prova3 = JSON.stringify(req.body);
@@ -73,7 +80,11 @@ app.post('/autenticazione', async (req, res) => {
 		if (error) {
 			res.send(prova + 'errore');
 		} else {
-			if (body.bookmark == 'nil') res.send('<h4>CREDENZIALI ERRATE</h4>');
+			if (body.bookmark == 'nil') 
+			{
+			    res.cookie("datiUtente",{"errore" : true})
+			    res.redirect('/static/login/');
+			}
 			else {
 			
 			    res.cookie("datiUtente",body)
@@ -706,7 +717,13 @@ app.post('/tabelledb', async (req, res) => {
 			return
 		 
 		}
-		else res.send(res2);
+		else {
+			res.send(res2)
+			pool.end(function(err){console.log(err)})
+		    return
+		
+		
+		};
 	});
 	pool.end(function(err){console.log(err)})
 	return
@@ -755,21 +772,108 @@ app.post('/insertriga', async (req, res) => {
 	 pool.query(query,async (error)=> {
 		if (error) 
 		{ 
-	      pool.end(function(err){console.log(err)})
-		  res.send(error);
+	      
+		  res.send(error + prova2.DB);
+		  pool.end(function(err){console.log(err)})
 		  return
-		}
+		}else{
 		
 		res.send("ok");
-		
+		pool.end(function(err){console.log(err)})
+		return
+		}	
 		
 	});
 
 
 
-	pool.end(function(err){console.log(err)})
-	return
+
 	
 
 
 })
+
+
+app.post('/updatedbutente', async (req, res) => {
+	var prova3 = JSON.stringify(req.body);
+	var dati = JSON.parse(prova3);
+	var prova = '';
+	
+	var query = { selector: { username: dati.username, password: dati.password } };
+
+	await utente.find(query, async (error, body, headers) =>{
+		prova = JSON.stringify(error);
+		//let prova2 = JSON.parse(prova)
+		if (error) {
+			res.send(prova + 'errore con il find degli elemtni');
+			return
+		} else {
+			if (body.bookmark == 'nil') res.send('errore elemento non trovato');
+			else {   
+				    var listaDB = []
+				    if(body.docs[0].listaDB == undefined)
+					{
+						listaDB.push(dati.db)
+					}
+					else 
+					{
+						listaDB = body.docs[0].listaDB
+						if(dati.aggiungi){
+						listaDB.push(dati.db)
+						}
+					}
+				   request(
+						{
+							url: 'http://admin:admin@' + process.env.COUCHDB_URL + '/utente/'+body.docs[0]._id+'/',
+				
+							method: 'PUT',
+				
+							body: {
+								"_id": body.docs[0]._id,
+								"_rev": body.docs[0]._rev,
+								"username": dati.username,
+								"password": dati.password,
+								"email": body.docs[0].email,
+								"listaDB": listaDB
+								
+							  },
+							content_type: 'application/json',
+							json: true
+						},
+						async  (error, response, body2)=> {
+							if (error) {
+
+								
+								res.send("errore " + error + body);
+								
+								return
+							} else {
+								var query = { selector: { username: dati.username, password: dati.password } };
+								await utente.find(query, function (error, body, headers) {
+									prova = JSON.stringify(error);
+									//let prova2 = JSON.parse(prova)
+									if (error) {
+										
+		                                return
+									} else {
+										if (body.bookmark == 'nil'){ res.send('errore generico'); return}
+										else {
+										
+											res.cookie("datiUtente",body)
+											res.send("ok");
+											return
+											//res.send(body)
+										}
+									}
+								});
+								
+							}
+						}
+					);;
+			    
+				
+				//res.send(body)
+			}
+		}
+	})
+});
