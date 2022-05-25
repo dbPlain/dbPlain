@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=0">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script src="https://kit.fontawesome.com/a45803d748.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="t.css" type="text/css" /> 
+	<link rel="stylesheet" href="transitions.css" type="text/css" />
+	<script src="t.js" type="text/javascript"></script>
+
+    <title>dbPlain</title>
+
+	<meta property="og:title" content="dbPlain" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Gestisci in modo EASY il tuo database!" /> 
+    <meta property="og:locale" content="it_it" />
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/static/assets/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
+	<meta name="msapplication-TileColor" content="#00a300">
+	<meta name="theme-color" content="#60b56d">
+</head>
+<body class="hero-anime">
+
+	<div class="shadow-title parallax-top-shadow">database</div>
+    <div class="section-parallax parallax-00"></div>
+    <div class="section-parallax parallax-01"></div>
+
+	<div class="navigation-wrap bg-dark start-header" id="navbar-res">
+		<div class="container">
+			<div class="row">
+				<div class="col-12">
+					<nav class="navbar navbar-expand-md">
+					
+						<a class="navbar-brand" href="#">
+							<img src="./assets/img/logo+nome_dbplain_negativo.png" alt="">
+						</a>
+						
+						<header class="cd-header" id="cd-header">
+							<div class="header-wrapper">
+								<div class="nav-but-wrap">
+									<div class="menu-icon hover-target">
+										<span class="menu-icon__line menu-icon__line-left"></span>
+										<span class="menu-icon__line"></span>
+										<span class="menu-icon__line menu-icon__line-right"></span>
+									</div>					
+								</div>	
+							</div>
+						</header>		
+						
+						<div class="collapse navbar-collapse" id="navbarSupportedContent">
+							<ul class="navbar-nav ml-auto py-4 py-md-0">
+
+								<!-- se non loggato, rendere non premibile -->
+								<li class="nav-item pl-4 pl-md-0 ml-0 ml-md-4">
+									<a class="nav-link" href="/static/home/">Services</a>
+								</li>
+								
+								<!-- se loggato, cambiare il testo in "logout" e creare logica di logout -->
+								<li class="nav-item pl-4 pl-md-0 ml-0 ml-md-4">
+									<a class="nav-link" href="/static/login/">Login</a>
+									<a class="nav-link" href="" style="display: none;">Logout</a>
+								</li>
+
+								<!-- <li class="nav-item pl-4 pl-md-0 ml-0 ml-md-4">
+									<span class="nav-link" onclick="transitionToPage('/static/login/')" style="cursor: pointer;">Login</span>
+								</li> -->
+
+							</ul>
+						</div>
+						
+					</nav>		
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="nav">
+		<div class="nav__content">
+			<ul class="nav__list">
+				<li class="nav__list-item active-nav"><a href="/static/login/" class="hover-target">Login</a></li>
+				<li class="nav__list-item"><a href="/static/home/" class="hover-target">My DB</a></li>
+			</ul>
+		</div>
+	</div>
+
+	
+	<div class="section full-height">
+		<div class="absolute-center">
+			<div class="section">
+				<div class="container">
+					<div class="row">
+						<div class="col-12">
+				<h1><span>d</span><span>b</span><span>P</span><span>l</span><span>a</span><span>i</span><span>n</span><br></h1>
+				<p>scopri il nostro sito!</p>	
+						</div>	
+					</div>		
+				</div>		
+			</div>
+		</div>
+	</div>
+
+	<!-- my: margin top and bottom. py: padding top and bottom (https://getbootstrap.com/docs/4.0/utilities/spacing/) -->
+	<div class="my-5 py-5">
+	</div>
+
+
+
+
+	<main class="wrapper">
+		<section class="section-transizione static">
+			
+			<div class="container">
+				<div class="row">
+					<div class="col text-center pb-md-2"><h2><q><strong>I dati sono il nuovo petrolio</strong></q></h2></div>
+					
+				</div>
+
+				<div class="row">
+					<div class="col">
+						<h5 class="paragrafo pb-md-3">
+							Così come il petrolio ha permesso lo sviluppo socio-economico mondiale tra il XIX ed il XX secolo, nel XXI secolo sono le connessioni, le tecnologie ed i dati a svolgere questo importante ruolo.<br>
+							I dati, hanno non solo permesso e promosso il progresso sociale, ma creato nuove opportunità di business, modificato completamente interi settori industriali e sviluppato nuove figure professionali.<br>
+							Il concetto di Big data, entrato a far parte del nostro vocabolario ormai da una decina d'anni, non è più solo un argomento dibattutissimo e di estremo interesse, ma anche oggetto di studio interdisciplinare in continua evoluzione.
+						</h5>
+					</div> 
+					<img class="col-lg-6 order-lg-12 img-db" src="./assets/img/img-db.jpg" alt="" >
+				</div>
+			</div>
+
+
+		  <!-- <h5><q>I dati sono diventati il quarto fattore produttivo, dopo i classici terra, lavoro e capitale.</q><br>Ecco perchè abbiamo pensato di ideare un'applicazione che permetta di lavorare i dati in maniera più veloce e intuitiva</h5> -->
+
+		</section>
+		
+		<section class="section-transizione parallax">
+		  <!-- <h1>Punti di forza</h1> -->
+		</section>
+
+		<section class="section-transizione static">
+
+			<div class="card" style="width: auto; box-shadow: 10px;">
+				<div class="card-body">
+
+					<div class="row justify-content-md-center">
+						<div class="col ">
+							<img src="./assets/img/contact-us.png"  alt="">
+						</div>
+						<div class="col">
+
+							<form name="" action="" method="">
+								<h4 class="mb-3">Scrivici la tua opinione!</h4>
+								<!-- <input type="email" name="myEmail" class="form-control" 
+									placeholder="Inserisci la tua email" required autofocus />
+								<input type="password" name="myPassword" class="form-control" 
+									placeholder="inserisci password" required /> -->
+							</form>
+
+						</div>
+					</div>
+					<br>
+				  	<a href="#" class="btn btn-primary">Go somewhere</a>
+				</div>
+			  </div>
+		
+		</section>
+	</main>
+
+
+	<!-- Footer
+	================================================== -->
+	<div class="section footpage fixed-bottom" id="foot-page">
+		<div class="container p-4 pb-0 text-center text-white">
+
+			<!-- Section: Github -->
+			<section class="mb-3">
+				<a class="mb-0">Guarda il codice sorgente qui: </a
+				><a class="btn btn-outline-light btn-floating m-1" href="https://github.com/dbPlain/dbPlain" role="button" target="_blank"
+				><i class="fab fa-github"></i
+				></a>
+			</section>
+		
+			<!-- Section: Nomi -->
+			<section class="">
+				<div class="row">
+					<div class="col-lg col-md mb-0 mb-md-0">
+						<h5 class="text-uppercase">Contributi al progetto:</h5>
+			
+						<ul class="list-unstyled mb-0">
+						<li>
+							<a href="https://github.com/Loenus" target="_blank" class="text-white">Lorenzo Lunghi</a>
+						</li>
+						<li>
+							<a href="https://github.com/PaoloMarchigno" target="_blank" class="text-white">Paolo Marchignoli</a>
+						</li>
+						<li>
+							<a href="https://github.com/andreeagabrielaionica" target="_blank" class="text-white">Andreea Gabriela Ionica</a>
+						</li>
+						</ul>
+					</div>
+				</div>
+
+			</section>
+
+		</div>
+		
+		<div class="text-center p-3 background-dark" >
+			© 2022 Copyright:
+			<a class="text-white" href="#">dbPlain.it</a>
+		</div>
+	</div>
+
+</body>
+</html>

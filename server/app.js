@@ -27,7 +27,7 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password != datirequest.confermapassword) res.send	('errore pass diverse');
+	if (datirequest.password != datirequest.confermapassword) res.send('errore pass diverse');
 	await utente.insert({
 		_id: t + '',
 		username: datirequest.username,
@@ -60,12 +60,9 @@ app.post('/registrazione', async (req, res) => {
       
     }*/
 app.post('/updatecookie', async (req, res) => {
-  res.cookie("datiUtente",{"errore" : false})
-  res.redirect('/static/login/');
-
-})
-
-
+	res.cookie('datiUtente', { errore: false });
+	res.redirect('/static/login/');
+});
 
 app.post('/autenticazione', async (req, res) => {
 	var prova3 = JSON.stringify(req.body);
@@ -80,14 +77,11 @@ app.post('/autenticazione', async (req, res) => {
 		if (error) {
 			res.send(prova + 'errore');
 		} else {
-			if (body.bookmark == 'nil') 
-			{
-			    res.cookie("datiUtente",{"errore" : true})
-			    res.redirect('/static/login/');
-			}
-			else {
-			
-			    res.cookie("datiUtente",body)
+			if (body.bookmark == 'nil') {
+				res.cookie('datiUtente', { errore: true });
+				res.redirect('/static/login/');
+			} else {
+				res.cookie('datiUtente', body);
 				res.redirect('/static/home/');
 				//res.send(body)
 			}
@@ -572,7 +566,9 @@ app.get('/prova2', async (req, res) => {
 		if (err) res.send(err);
 		else res.send(res2);
 	});
-	pool.end(function(err){console.log(err)})
+	pool.end(function (err) {
+		console.log(err);
+	});
 });
 
 app.post('/colonneTabella', async (req, res) => {
@@ -592,7 +588,9 @@ app.post('/colonneTabella', async (req, res) => {
 			res.send(res2);
 		}
 	);
-	pool.end(function(err){console.log(err)})
+	pool.end(function (err) {
+		console.log(err);
+	});
 });
 
 app.post('/selezionaDatiTabella', async (req, res) => {
@@ -610,7 +608,9 @@ app.post('/selezionaDatiTabella', async (req, res) => {
 	pool.query('select * from  ' + prova2.tabella, function (err, res2) {
 		res.send(res2);
 	});
-	pool.end(function(err){console.log(err)})
+	pool.end(function (err) {
+		console.log(err);
+	});
 });
 
 app.post('/connessionedb', async (req, res) => {
@@ -633,15 +633,19 @@ app.post('/connessionedb', async (req, res) => {
 	});
 	//res.send(t)
 	pool.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
-		if (error){
+		if (error) {
 			res.send('errore');
-			pool.end(function(err){console.log(err)})
-	        return
-		} 
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		}
 		res.send('ok');
 	});
-	pool.end(function(err){console.log(err)})
-	return
+	pool.end(function (err) {
+		console.log(err);
+	});
+	return;
 });
 
 app.post('/selezionaDatiTabelladinamico', async (req, res) => {
@@ -665,7 +669,9 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
 	pool.query('select * from  ' + prova2.tabella + ' limit 100', function (err, res2) {
 		res.send(res2);
 	});
-	pool.end(function(err){console.log(err)})
+	pool.end(function (err) {
+		console.log(err);
+	});
 });
 
 app.post('/tabelledb', async (req, res) => {
@@ -689,13 +695,16 @@ app.post('/tabelledb', async (req, res) => {
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
 		if (err) {
 			res.send(err);
-			pool.end(function(err){console.log(err)})
-			return
-		}
-		else res.send(res2);
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		} else res.send(res2);
 	});
-    pool.end(function(err){console.log(err)})
-	return
+	pool.end(function (err) {
+		console.log(err);
+	});
+	return;
 });
 
 app.post('/tabelledb', async (req, res) => {
@@ -709,171 +718,144 @@ app.post('/tabelledb', async (req, res) => {
 		port: prova2.PORT,
 	});
 
-
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err){ 
+		if (err) {
 			res.send(err);
-			pool.end(function(err){console.log(err)})
-			return
-		 
-		}
-		else {
-			res.send(res2)
-			pool.end(function(err){console.log(err)})
-		    return
-		
-		
-		};
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		} else res.send(res2);
 	});
-	pool.end(function(err){console.log(err)})
-	return
+	pool.end(function (err) {
+		console.log(err);
+	});
+	return;
 });
 
 app.post('/insertriga', async (req, res) => {
-	
 	var prova = JSON.stringify(req.body);
 	var prova2 = JSON.parse(prova);
-	  const pool = new Pool({
+	const pool = new Pool({
 		user: prova2.USER,
 		host: prova2.HOST,
 		database: prova2.DB,
 		password: prova2.PASS,
 		port: prova2.PORT,
 	});
-	var campi=""
-	var valori = ""
-	var pass = 0
-	var out = ""
-	for  (var  key in prova2){
-	  var key2 = toString(key)
-	  
-      if(key != "HOST" && key != "DB" && key != "PORT" && key != "PASS" && key != "USER"){
-       if (pass < 2 ){
-		if (pass == 1 ){
-		    
-			campi = campi + key 
-			valori = valori + "'"+prova2[key] + "'"
-		  
-		}
-		  pass++
-		   
+	var campi = '';
+	var valori = '';
+	var pass = 0;
+	var out = '';
+	for (var key in prova2) {
+		//var key2 = toString(key)
 
-        } 
-		else{
-			campi = campi +", "+ key 
-			valori = valori +", '"+ prova2[key] +"'"
+		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
+			if (pass < 2) {
+				if (pass == 1) {
+					campi = campi + key;
+					valori = valori + "'" + prova2[key] + "'";
+				}
+				pass++;
+			} else {
+				campi = campi + ', ' + key;
+				valori = valori + ", '" + prova2[key] + "'";
+			}
 		}
-	  }
-		
-	} 
-   var query =  "INSERT INTO "+prova2.tabella+"("+campi+")" +
-		"VALUES" +"("+valori+");"+out
+	}
+	var query = 'INSERT INTO ' + prova2.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
 	//res.send(query)
-	 pool.query(query,async (error)=> {
-		if (error) 
-		{ 
-	      
-		  res.send(error + prova2.DB);
-		  pool.end(function(err){console.log(err)})
-		  return
-		}else{
-		
-		res.send("ok");
-		pool.end(function(err){console.log(err)})
-		return
-		}	
-		
+	pool.query(query, async (error) => {
+		if (error) {
+			res.send(error + prova2.DB);
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		}
 	});
 
-
-
-
-	
-
-
-})
-
+	res.send('ok');
+});
 
 app.post('/updatedbutente', async (req, res) => {
 	var prova3 = JSON.stringify(req.body);
 	var dati = JSON.parse(prova3);
 	var prova = '';
-	
+
 	var query = { selector: { username: dati.username, password: dati.password } };
 
-	await utente.find(query, async (error, body, headers) =>{
+	await utente.find(query, async (error, body, headers) => {
 		prova = JSON.stringify(error);
 		//let prova2 = JSON.parse(prova)
 		if (error) {
 			res.send(prova + 'errore con il find degli elemtni');
-			return
+			return;
 		} else {
 			if (body.bookmark == 'nil') res.send('errore elemento non trovato');
-			else {   
-				    var listaDB = []
-				    if(body.docs[0].listaDB == undefined)
-					{
-						listaDB.push(dati.db)
+			else {
+				var listaDB = [];
+				if (body.docs[0].listaDB == undefined) {
+					listaDB.push(dati.db);
+				} else {
+					listaDB = body.docs[0].listaDB;
+					if (dati.aggiungi) {
+						listaDB.push(dati.db);
 					}
-					else 
+				}
+				request(
 					{
-						listaDB = body.docs[0].listaDB
-						if(dati.aggiungi){
-						listaDB.push(dati.db)
-						}
-					}
-				   request(
-						{
-							url: 'http://admin:admin@' + process.env.COUCHDB_URL + '/utente/'+body.docs[0]._id+'/',
-				
-							method: 'PUT',
-				
-							body: {
-								"_id": body.docs[0]._id,
-								"_rev": body.docs[0]._rev,
-								"username": dati.username,
-								"password": dati.password,
-								"email": body.docs[0].email,
-								"listaDB": listaDB
-								
-							  },
-							content_type: 'application/json',
-							json: true
-						},
-						async  (error, response, body2)=> {
-							if (error) {
+						url: 'http://admin:admin@' + process.env.COUCHDB_URL + '/utente/' + body.docs[0]._id + '/',
 
-								
-								res.send("errore " + error + body);
-								
-								return
-							} else {
-								var query = { selector: { username: dati.username, password: dati.password } };
-								await utente.find(query, function (error, body, headers) {
-									prova = JSON.stringify(error);
-									//let prova2 = JSON.parse(prova)
-									if (error) {
-										
-		                                return
+						method: 'PUT',
+
+						body: {
+							_id: body.docs[0]._id,
+							_rev: body.docs[0]._rev,
+							username: dati.username,
+							password: dati.password,
+							email: body.docs[0].email,
+							listaDB: listaDB,
+						},
+						content_type: 'application/json',
+						json: true,
+					},
+					async (error, response, body2) => {
+						if (error) {
+							res.send('errore ' + error + body);
+
+							return;
+						} else {
+							var query = { selector: { username: dati.username, password: dati.password } };
+							await utente.find(query, function (error, body, headers) {
+								prova = JSON.stringify(error);
+								//let prova2 = JSON.parse(prova)
+								if (error) {
+									return;
+								} else {
+									if (body.bookmark == 'nil') {
+										res.send('errore generico');
+										return;
 									} else {
-										if (body.bookmark == 'nil'){ res.send('errore generico'); return}
-										else {
-										
-											res.cookie("datiUtente",body)
-											res.send("ok");
-											return
-											//res.send(body)
-										}
+										res.cookie('datiUtente', body);
+										res.send('ok');
+										return;
+										//res.send(body)
 									}
-								});
-								
-							}
+								}
+							});
 						}
-					);;
-			    
-				
+					}
+				);
+
 				//res.send(body)
 			}
 		}
-	})
+	});
 });

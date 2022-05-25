@@ -1,5 +1,29 @@
-(function ($) {
+/* Please ❤ this if you like it! */
+
+$(function ($) {
 	'use strict';
+
+	//Parallax
+
+	function scrollBanner() {
+		$(document).on('scroll', function () {
+			var scrollPos = $(this).scrollTop();
+			$('.parallax-fade-top').css({
+				// top: scrollPos / 2 + 'px',
+				opacity: 1 - scrollPos / 700,
+			});
+			$('.parallax-00').css({
+				// top: scrollPos / -3.5 + 'px',
+			});
+			$('.parallax-01').css({
+				top: scrollPos / -2.8 + 'px',
+			});
+			$('.parallax-top-shadow').css({
+				// top: scrollPos / -2 + 'px',
+			});
+		});
+	}
+	scrollBanner();
 
 	//Page cursors
 
@@ -27,88 +51,6 @@
 	function o(t) {
 		t.addEventListener('mouseover', n), t.addEventListener('mouseout', s);
 	}
-
-	//Navigation
-
-	var app = (function () {
-		var body = undefined;
-		var menu = undefined;
-		var menuItems = undefined;
-		var init = function init() {
-			body = document.querySelector('body');
-			menu = document.querySelector('.menu-icon');
-			menuItems = document.querySelectorAll('.nav__list-item');
-			applyListeners();
-		};
-		var applyListeners = function applyListeners() {
-			menu.addEventListener('click', function () {
-				return toggleClass(body, 'nav-active');
-			});
-		};
-		var toggleClass = function toggleClass(element, stringClass) {
-			if (element.classList.contains(stringClass)) element.classList.remove(stringClass);
-			else element.classList.add(stringClass);
-			if ($('#cd-header').hasClass('navbar-zero')) $('#cd-header').removeClass('navbar-zero');
-			else $('#cd-header').addClass('navbar-zero');
-		};
-		init();
-	})();
-
-	//Switch light/dark
-
-	$('#switch').on('click', function () {
-		if ($('body').hasClass('light')) {
-			$('body').removeClass('light');
-			$('#switch').removeClass('switched');
-		} else {
-			$('body').addClass('light');
-			$('#switch').addClass('switched');
-		}
-	});
-})(jQuery);
-
-(function ($) {
-	'use strict';
-
-	//Parallax
-
-	function scrollBanner() {
-		$(document).on('scroll', function () {
-			var scrollPos = $(this).scrollTop();
-			$('.parallax-fade-top').css({
-				top: scrollPos / 2 + 'px',
-				opacity: 1 - scrollPos / 700,
-			});
-			$('.parallax-00').css({
-				top: scrollPos / -3.5 + 'px',
-			});
-			$('.parallax-01').css({
-				top: scrollPos / -2.8 + 'px',
-			});
-			$('.parallax-top-shadow').css({
-				top: scrollPos / -2 + 'px',
-			});
-		});
-	}
-	scrollBanner();
-
-	/* navbar scompare e ricompare */
-	$(document).ready(function () {
-		$(window).scroll(function () {
-			var scroll = $(window).scrollTop();
-			if (scroll > 400) {
-				$('.cd-header').addClass('navbar-scrolll');
-			} else {
-				$('.cd-header').removeClass('navbar-scrolll');
-			}
-			if (scroll > 500) {
-				$('.cd-header').addClass('navbar-visible');
-			} else {
-				$('.cd-header').removeClass('navbar-visible');
-			}
-		});
-	});
-	/* navbar scompare e ricompare */
 
 	//Scroll back to top
 
@@ -156,4 +98,4 @@
 		});
 		$('.case-study-name:nth-child(1)').trigger('mouseenter');
 	});
-})(jQuery);
+});

@@ -212,26 +212,30 @@
               
               
               })
+
+              var varflag = 1;
               $("#testa").each(function(index,item){
             
-             
-              var lista = item.innerText.split('\t')
-              var elementifunz = "'"+tabella+"','tabella'"
-              "document.getElementById('hostDB').value"
-              console.log(lista)
-              lista.forEach(element => {
-                elementifunz = elementifunz+",document.getElementById('"+element+"').value,'"+element+"'"
+              if (varflag!=1) {
+                var lista = item.innerText.split('\t')
+                var elementifunz = "'"+tabella+"','tabella'"
+                "document.getElementById('hostDB').value"
+                console.log(lista)
+                lista.forEach(element => {
+                  elementifunz = elementifunz+",document.getElementById('"+element+"').value,'"+element+"'"
+                  
+                $("#popup-container2").append('<span> '+element+' </span><br/>')
+                $("#popup-container2").append('<input  type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
+                });
                 
-              $("#popup-container2").append('<span> '+element+' </span><br/>')
-              $("#popup-container2").append('<input  type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
-              });
-              
-              console.log(elementifunz)
-              var stringa = '<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>'
-              console.log(stringa)
-              $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
-              $("#popup-container2").append('<div style="margin-top: 10px;" class="alert alert-danger" id="errorpop2"> errore inserimento dati </div>')
-              $("#errorpop2").hide()
+                console.log(elementifunz)
+                var stringa = '<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>'
+                console.log(stringa)
+                $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
+                $("#popup-container2").append('<div style="margin-top: 10px;" class="alert alert-danger" id="errorpop2"> errore inserimento dati </div>')
+                $("#errorpop2").hide()
+              }
+            varflag =2;
             })
               $("#popup-container2").show()
 
