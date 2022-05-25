@@ -127,6 +127,9 @@
                       var lista= []
                       var   tr2 = document.createElement("tr")
                       console.log("uguali"  )
+                      var th = document.createElement("th")
+                      th.innerHTML=" <span onclick='eliminaRow("+-1+")' style='color:red' class='bi bi-trash'></span>"
+                      tr2.appendChild(th)
                       for  (var  key in jsonO){
                         if(key != "HOST" && key != "DB" && key != "PORT" && key != "PASS" && key != "USER"){
                         
@@ -213,20 +216,24 @@
               
               })
 
-              var varflag = 1;
+              
               $("#testa").each(function(index,item){
             
-              if (varflag!=1) {
+              
                 var lista = item.innerText.split('\t')
                 var elementifunz = "'"+tabella+"','tabella'"
                 "document.getElementById('hostDB').value"
                 console.log(lista)
+                var flag = 1;
                 lista.forEach(element => {
-                  elementifunz = elementifunz+",document.getElementById('"+element+"').value,'"+element+"'"
-                  
-                $("#popup-container2").append('<span> '+element+' </span><br/>')
-                $("#popup-container2").append('<input  type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
-                });
+                  if (flag!=1) {
+                    elementifunz = elementifunz+",document.getElementById('"+element+"').value,'"+element+"'"
+                    
+                    $("#popup-container2").append('<span> '+element+' </span><br/>')
+                    $("#popup-container2").append('<input  type="text" name='+element+' class="form-control"  id='+element+' placeholder="Inserisci qualcosa" /><br/>')
+                    }
+                    flag =2;
+                  });
                 
                 console.log(elementifunz)
                 var stringa = '<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>'
@@ -234,8 +241,7 @@
                 $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
                 $("#popup-container2").append('<div style="margin-top: 10px;" class="alert alert-danger" id="errorpop2"> errore inserimento dati </div>')
                 $("#errorpop2").hide()
-              }
-            varflag =2;
+            
             })
               $("#popup-container2").show()
 
