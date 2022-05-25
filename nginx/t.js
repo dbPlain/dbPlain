@@ -40,8 +40,7 @@ $(function () {
 		if ($(window).width() > 767 && body.classList.contains('nav-active')) body.classList.remove('nav-active');
 	});
 
-	// script 3
-
+	// Parallax
 	function scrollBanner() {
 		$(document).on('scroll', function () {
 			var scrollPos = $(this).scrollTop();
@@ -62,17 +61,7 @@ $(function () {
 	}
 	scrollBanner();
 
-	// Menu On Hover
-	// $('body').on('mouseenter mouseleave','.nav-item', function(e){
-	// 	if ($(window).width() > 750) {
-	// 		let _d=$(e.target).closest('.nav-item');
-	// 		_d.addClass('show');
-	// 		setTimeout(function(){
-	// 			_d[_d.is(':hover')?'addClass':'removeClass']('show');
-	// 		},1);
-	// 	}
-	// });
-
+	// span works like a link
 	window.transitionToPage = function (href) {
 		$('.navigation-wrap').addClass('navigation-back');
 
