@@ -14,8 +14,6 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.use(compression());
 
-app.use(express.static('/usr/src/app/src/favicon/'));
-
 //const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use('utente');
 //const utentelist =  utente.list()
