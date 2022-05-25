@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
     <link rel="stylesheet" type="text/css" href="index.css" />
     <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
     </script>
@@ -37,16 +39,16 @@
           
           
           
-          var stop = false
           var tabella=""
           var infoDB ={}
           
            $(document).ready(function(){
              
+
+            $('#inseriscirigabutton').hide()
+
             $("#droptabelle").hide()
             $("#popupdierrore").hide()
-            $("#popup-container").hide()
-            $("#popup-container2").hide()
             var sidenavbar = "si"
             $("#errorpop2").hide()
            
@@ -56,10 +58,9 @@
             $("#show-popup-btn").click(function(){
               start = false
               $("#popupdierrore").hide()
-              if(!stop){
-                stop = true
+
                 $("#popup-container").show()
-              }
+
              })
             $("#hamburger").click(function(){
 
@@ -80,7 +81,6 @@
             })
 
              $("#close-btn").click(function(){
-                 stop=false
                 $("#popup-container").hide()})
            })
            //inserti riga
@@ -154,7 +154,6 @@
                 else{
                     console.log("non uguali")
                  }
-                stop = false
               }
               else 
               {
@@ -173,9 +172,7 @@
             
             
            
-            $("#popup-container2").hide()
             $("#errorpop2").hide()
-            stop = false
         
            
      
@@ -184,9 +181,7 @@
             
             
           if(true){
-            $("#popup-container2").hide()
             $("#errorpop2").hide()
-            stop = false
           }
            }
            function setTabella(nomeTabella){
@@ -198,20 +193,16 @@
            //setup insert righe in tabella
            function insertriga(){
             
-            if(!stop && tabella != "")
+            if(tabella != "")
             { 
-              stop = true
               $("#nometab").remove()
               
               
                $("#popup-container2").empty()
-               $("#popup-container2").append('<div id="close-btn2"><span>close</span></div><br/>')
-               $("#popup-container2").append('<span style="float:left">inserisci riga nella tabella '+tabella+' </span><br/>')
+               $("#popup-container2").append('<span style="float:left">inserisci riga nella tabella \"'+tabella+'\" </span><br/><br/>')
               
               $("#close-btn2").click(function(){
 
-                 stop=false
-                $("#popup-container2").hide()
               
               
               })
@@ -238,7 +229,7 @@
                 console.log(elementifunz)
                 var stringa = '<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>'
                 console.log(stringa)
-                $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
+                $("#popup-container2").append('<button onclick="sendInsert('+elementifunz+')" data-bs-dismiss="modal" style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger">invia</button>')
                 $("#popup-container2").append('<div style="margin-top: 10px;" class="alert alert-danger" id="errorpop2"> errore inserimento dati </div>')
                 $("#errorpop2").hide()
             
@@ -248,10 +239,10 @@
             }
             else
             { 
-              if(!stop)
-              {
+
+
               $("#popupdierrore").show()
-              }
+
               
               console.log("errore")
             }
@@ -276,7 +267,6 @@
              }
              else{
               
-               stop = false
                $("#dropdown2").append('<a name='+dati+' id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
                $("#"+dati.DB + dati.HOST).click(function(){
                 infoDB = dati
@@ -392,6 +382,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               aCampo.setAttribute("href","#")//"showtabella.html?nometabella="+item.table_name)
               aCampo.innerHTML = item.table_name
               aCampo.addEventListener("click" , function(){
+                $('#inseriscirigabutton').show()
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
                 
                 setTabella(item.table_name)
@@ -439,21 +430,22 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                         
                         if (t == 1 ){
                         
-                        var th = document.createElement("th")
-                        th.setAttribute("name", "colonna")
-                        th.innerHTML=key
-                        tr.appendChild(th)
-                        if (t2 == 1 ){
-                             var temp = contatore-1
-                             th = document.createElement("th")
-                             th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red'class='bi bi-trash'></span>"
-                             tr2.appendChild(th)
-                             t2 = 2
-                             
-                          }
-                        th = document.createElement("th")
-                        th.innerHTML=item[key]
-                        tr2.appendChild(th)
+                          var th = document.createElement("th")
+                          th.setAttribute("name", "colonna")
+                          th.innerHTML=key
+                          tr.appendChild(th)
+                          if (t2 == 1 ){
+                              var temp = contatore-1
+                              th = document.createElement("th")
+                              th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red'class='bi bi-trash'></span>"
+                              
+                              tr2.appendChild(th)
+                              t2 = 2
+                              
+                            }
+                          th = document.createElement("th")
+                          th.innerHTML=item[key]
+                          tr2.appendChild(th)
                         
                         }
                         else{
@@ -536,7 +528,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
 #close-btn{
   float: right;
 }
-#popup-container{
+/* #popup-container{
   position: absolute;
   left: 25%;
   top: 10%;
@@ -546,11 +538,11 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
   background-color: #eee;
   border: 1px solid #ccc;
   box-shadow: 0px 0px 10px #ccc;
-}
+} */
 #close-btn2{
   float: right;
 }
-#popup-container2{
+/* #popup-container2{
   position: absolute;
   background-color: #eee;
   left: 25%;
@@ -559,7 +551,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
   padding: 20px;
   border: 1px solid rgb(120, 100, 100);
   
-}
+} */
 body {
   font-family: "Lato", sans-serif;
 }
@@ -628,6 +620,7 @@ body {
   padding-right: 8px;
 }
 
+
 /* Some media queries for responsiveness */
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15px;}
@@ -637,21 +630,104 @@ body {
 </head>
 <body>
   
-  <div  class="container-fluid" id = "popup-container2">
-    <div id="close-btn2">
-       <span>close</span>
+  <div class="modal fade" id="popup-container" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Aggiungi un database</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
 
+          <form action="javascript:void(0);">
+            <div class="mb-3">
+              <span>HOST:</span>
+              <input type="text" name="hostDB" class="form-control"  id="hostDB"
+                  placeholder="Inserisci l'host del tuo db" required autofocus />
+            </div>
+            <div class="mb-3">
+              <span>NOME DB:</span>
+              <input type="text" name="nomeDB" class="form-control" id="nomeDB"
+                  placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>USER:</span>
+              <input type="text" name="userDB" class="form-control" id="userDB"
+                  placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>PASSWORD:</span>
+              <input type="text" name="passwordDB" class="form-control" id="passwordDB"
+                placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>PORT:</span>
+              <input type="text" name="portdDB" class="form-control" id="portDB"
+                  placeholder="inserisci " required />
+            </div>
+            
+            
+            
+            
+            
+                
+           
+            <button onclick="Connessionedb(document.getElementById('hostDB').value,
+                                           document.getElementById('nomeDB').value,
+                                           document.getElementById('userDB').value,
+                                           document.getElementById('passwordDB').value,
+                                           document.getElementById('portDB').value)" 
+                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" data-bs-dismiss="modal">Connetti db</button>
+            
+    
+            <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
+            <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
+            <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="margin-top: 40px; margin-left: 15%;">Close</button> -->
+          </form>
+
+        </div>
+      </div>
     </div>
-  
-  
-    
-    
   </div>
 
 
-</div>
-<div  id = "popup-container">
-  <div id="close-btn">
+
+
+
+  <div class="modal fade" id="inserisci-riga" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Aggiungi un database</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <div  class="container-fluid" id = "popup-container2">
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div  class="container-fluid" id = "popup-container2">
+
+
+
+  </div> -->
+
+
+
+
+
+
+<div id="popup-container">
+
+  <!-- <div id="close-btn">
      <span>close</span>
    
   </div>
@@ -662,7 +738,7 @@ body {
         
         <span>HOST:</span>
         <input type="text" name="hostDB" class="form-control"  id="hostDB"
-            placeholder="Inserisci l'host del tuo db" required autofocus /> <!-- name is required in una form (vedi su internet: differenza id e name) -->
+            placeholder="Inserisci l'host del tuo db" required autofocus />
         <span>NOME DB:</span>
         <input type="text" name="nomeDB" class="form-control" id="nomeDB"
             placeholder="inserisci password" required />
@@ -687,21 +763,19 @@ body {
 
         <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
         <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
-    </form>
+    </form> -->
 </div>
 
 <div  id="sidenav"class="sidenav">
-  <a href="#about">About</a>
-  <a href="#contact">Search</a>
-  <a href="#services">Services</a>
-  <a href="#clients">Clients</a>
-  <a href="#contact">Contact</a>
+  
+  <br><br>
+  <a href="#contact">Logout</a>
   
   <button id="dropdowndb-btn" class="dropdown-btn">database 
     <i class="fa fa-caret-down"></i>
   </button>
   <div class="dropdown-container" id="dropdown2">
-    <a href="#" style="text-align:left;" id="show-popup-btn">+add-db</a>
+    <a href="" type="button" data-bs-toggle="modal" data-bs-target="#popup-container" id="show-popup-btn" data-bs-toggle="modal" type="button" data-bs-target="#popup-container">+add-db</a>
   </div>
   <button id="droptabelle" class="dropdown-btn">Tabelle 
     <i class="fa fa-caret-down"></i>
@@ -725,7 +799,7 @@ body {
       </ul>
       
     </div>
-    <button onclick="insertriga()" type="button" class="btn btn-success">inserisci nuova riga </button>
+    <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
     
   </nav>
 
