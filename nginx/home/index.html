@@ -21,6 +21,8 @@
      
     //return null;
     
+          var contatore_riga = 0;
+
           var start = true 
           let prova = decodeURIComponent(document.cookie)
           var provasub = prova.substring(prova.indexOf("{"),prova.length)
@@ -44,6 +46,34 @@
           
            $(document).ready(function(){
              
+            const mediaQuery = window.matchMedia('(max-width: 576px)')
+            if (mediaQuery.matches) {
+              console.log('entrato')
+              $('#inseriscirigabutton').html('+')
+            } else {
+                $('#inseriscirigabutton').html('Inserisci riga')
+            }
+
+            $(window).on('resize', function(){
+
+              if (mediaQuery.matches) {
+                $('#inseriscirigabutton').html('+')
+              } else {
+                $('#inseriscirigabutton').html('Inserisci riga')
+              }
+
+              setTimeout(function(){
+                   var tbody = document.getElementById("testa")
+                   var grandezza = tbody.offsetWidth 
+                   console.log(grandezza)
+                   var navbarlaterale = document.getElementById("sidenav")
+                   var grandezza2 = navbarlaterale.offsetWidth
+                   console.log(grandezza2)
+                   var variabile = (grandezza + grandezza2 + 21) 
+                   var nabvar = document.getElementById("navbarprova")
+                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   }, 50);
+            });
 
             $('#inseriscirigabutton').hide()
 
@@ -68,13 +98,39 @@
               {
                   sidenavbar = "no"
                   $("#sidenav").hide()
+                  $('#dati2').attr('style', 'margin-left:0')
+
+                  setTimeout(function(){
+                   var tbody = document.getElementById("testa")
+                   var grandezza = tbody.offsetWidth 
+                   console.log(grandezza)
+                   var navbarlaterale = document.getElementById("sidenav")
+                   var grandezza2 = navbarlaterale.offsetWidth
+                   console.log(grandezza2)
+                   var variabile = (grandezza  + 21) 
+                   var nabvar = document.getElementById("navbarprova")
+                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   }, 50);
 
               }
               else 
               {  
                 sidenavbar = "si"
                 $("#sidenav").show()
+                if ( mediaQuery.matches ) $('#dati2').attr('style', 'margin-left:150px')
+                else $('#dati2').attr('style', 'margin-left:200px')
 
+                setTimeout(function(){
+                   var tbody = document.getElementById("testa")
+                   var grandezza = tbody.offsetWidth 
+                   console.log(grandezza)
+                   var navbarlaterale = document.getElementById("sidenav")
+                   var grandezza2 = navbarlaterale.offsetWidth
+                   console.log(grandezza2)
+                   var variabile = (grandezza + grandezza2  + 21) 
+                   var nabvar = document.getElementById("navbarprova")
+                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   }, 50);
               }
 
 
@@ -87,7 +143,8 @@
           
            function sendInsert()
            {
-             
+            contatore_riga++;
+             console.log("AOOOOO "+contatore_riga)
             var json = '{"'+arguments[1]+'": "' + arguments[0]+'"'
             for (var i = 2; i < arguments.length; i+=2){
               var element = arguments[i]
@@ -129,6 +186,10 @@
                       console.log("uguali"  )
                       var th = document.createElement("th")
                       th.innerHTML=" <span onclick='eliminaRow("+-1+")' style='color:red' class='bi bi-trash'></span>"
+                      console.log(contatore_riga + "e mo")
+
+                      if ((contatore_riga-1)%2 == 0 ) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                      else th.setAttribute('style', 'font-weight:normal')
                       tr2.appendChild(th)
                       for  (var  key in jsonO){
                         if(key != "HOST" && key != "DB" && key != "PORT" && key != "PASS" && key != "USER"){
@@ -136,6 +197,8 @@
                         console.log(key)
                         th = document.createElement("th")
                         th.innerHTML=jsonO[key]
+                        if ((contatore_riga-1)%2 == 0) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                        else th.setAttribute('style', 'font-weight:normal')
                         lista.push(th)
                         
                         }
@@ -163,6 +226,8 @@
               }
              }
               richiestaInsert.send(JSON.stringify(jsonO))
+              
+              // contatore_riga++;
            }
            
            // aggiunge riga inserita nel db nella visualizzazione grafica
@@ -267,16 +332,28 @@
              }
              else{
               
+              $('#conneti-db-btn').attr('data-bs-dismiss',"modal")
+              $('#conneti-db-btn').trigger( "click" );
+              $('#conneti-db-btn').removeAttr('data-bs-dismiss')
+
                $("#dropdown2").append('<a name='+dati+' id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
                $("#"+dati.DB + dati.HOST).click(function(){
-                infoDB = dati
-                 
-                $("#dropdown").remove()
-                $("#sidenav").append('<div class="dropdown-container" id="dropdown"></div>')
-                dropdowntabella(dati)})
-               $("#errorpop").hide()
-               $("#existpop").hide()
-               $("#popup-container").hide()
+                  infoDB = dati
+                  
+                  // tiene illuminato il database selezionato
+                  $("#dropdown2").children().css({
+                      "color": "", 
+                  });
+                  $("#"+dati.DB + dati.HOST).css({
+                      "color": "#f1f1f1",
+                  });
+
+                  $("#dropdown").remove()
+                  $("#sidenav").append('<div class="dropdown-container" id="dropdown"></div>')
+                  dropdowntabella(dati)})
+                $("#errorpop").hide()
+                $("#existpop").hide()
+                $("#popup-container").hide()
             }
            
           }
@@ -381,12 +458,24 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               let aCampo = document.createElement("a");
               aCampo.setAttribute("href","#")//"showtabella.html?nometabella="+item.table_name)
               aCampo.innerHTML = item.table_name
+              aCampo.setAttribute('id', item.table_name + '202')
               aCampo.addEventListener("click" , function(){
                 $('#inseriscirigabutton').show()
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
-                
+
+                contatore_riga = 0;
+
                 setTabella(item.table_name)
-                document.getElementById("testa").remove() 
+                document.getElementById("testa").remove()
+                
+                  
+                  // tiene illuminato la tabella selezionata
+                  $("#dropdown").children().css({
+                      "color": "", 
+                  });
+                  $("#"+item.table_name+'202').css({
+                      "color": "#f1f1f1",
+                  });
                
                 var tr = document.createElement("tr")
                 tr.setAttribute("id", "testa")
@@ -423,6 +512,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                       if (t == 1){
                         var th = document.createElement("th")
                         th.innerHTML=""
+                        th.setAttribute('style', 'width: 10px; background-color: #BEE7C5')
                         tr.appendChild(th)
                         console.log()
                        }
@@ -432,42 +522,61 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                         
                           var th = document.createElement("th")
                           th.setAttribute("name", "colonna")
+                          th.setAttribute("style", "background-color: #BEE7C5") // style nome colonne
                           th.innerHTML=key
                           tr.appendChild(th)
                           if (t2 == 1 ){
                               var temp = contatore-1
                               th = document.createElement("th")
-                              th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red'class='bi bi-trash'></span>"
-                              
+                              th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red;'class='bi bi-trash'></span>"
+                              th.setAttribute('style', 'background-color:#E7F7CC')
                               tr2.appendChild(th)
                               t2 = 2
                               
                             }
+                            
                           th = document.createElement("th")
                           th.innerHTML=item[key]
+                          // style prima riga della tabella
+                          th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC')
                           tr2.appendChild(th)
-                        
+
+                          
                         }
                         else{
                           if (t2 == 1 ){
                              th = document.createElement("th")
                              var temp = contatore-1
                              th.innerHTML=" <span onclick='eliminaRow("+temp+")' style='color:red' class='bi bi-trash'></span>"
+                             if (contatore_riga%2 == 0) th.setAttribute('style', 'background-color: #E7F7CC;')
                              tr2.appendChild(th)
                              th = document.createElement("th")
                              th.innerHTML=item[key]
+                             // style prima colonna di ogni riga della tabella
+                            if (contatore_riga%2 == 0) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                            else th.setAttribute('style', 'font-weight:normal')
                              tr2.appendChild(th)
                             t2 = 2
+                            
                           }
                           else
                           {
                              th = document.createElement("th")
                              th.innerHTML=item[key]
+                             // style resto delle colonne per ogni riga della tabella
+                             if (contatore_riga%2 == 0) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                             else th.setAttribute('style', 'font-weight:normal')
                              tr2.appendChild(th)
+
+                             
                           }
                         }
                         
+                        
                       } 
+
+                      contatore_riga++;
+
                       t=2
                       tbody.appendChild(tr2)
                      
@@ -476,19 +585,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                     
                     })
                    }
-                   
-                   
-                   setTimeout(function(){
-                    var tbody = document.getElementById("testa")
-                   var grandezza = tbody.offsetWidth 
-                   console.log(grandezza)
-                   var navbarlaterale = document.getElementById("sidenav")
-                   var grandezza2 = navbarlaterale.offsetWidth
-                   console.log(grandezza2)
-                   var variabile = (grandezza + grandezza2) 
-                   var nabvar = document.getElementById("navbarprova")
-                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
-                   }, 100);
+                  
                   
                 // dimensiona()
                  
@@ -508,13 +605,37 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               
 
 
-
+                setTimeout(function(){
+                   var tbody = document.getElementById("testa")
+                   var grandezza = tbody.offsetWidth 
+                   console.log(grandezza)
+                   var navbarlaterale = document.getElementById("sidenav")
+                   var grandezza2 = navbarlaterale.offsetWidth
+                   console.log(grandezza2)
+                   var variabile = (grandezza + grandezza2 + 21) 
+                   var nabvar = document.getElementById("navbarprova")
+                   nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   }, 250);                 
               })
+
               drop.appendChild(aCampo)
              
 });
+
+         
+
          }
          httpRequest.send(JSON.stringify(datiDataBase))
+
+
+         $('#droptabelle').trigger('click');
+         $('#droptabelle').addClass('active');
+}
+
+
+function logout(){
+  alert('TODO: rimuovere i cookie')
+  window.location.replace('/static/')
 }
     </script>
    
@@ -595,7 +716,7 @@ body {
   padding: 0px 10px;
 }
 .main {
- margin-top: 0px;
+ margin-top: 10px;
   margin-left: 200px; /* Same as the width of the sidenav */
   font-size: 20px; /* Increased text to enable scrolling */
   padding: 0px 10px;
@@ -626,10 +747,30 @@ body {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
+
+@media screen and (max-width: 576px) {
+  .sidenav a, .dropdown-btn{
+    font-size: 15px;
+  }
+  .sidenav{
+    width: 150px;
+  }
+  #dati2 {
+    margin-left: 150px;
+  }
+}
+
 </style>
 </head>
 <body>
   
+  <!-- 
+    BUG 1: chiudi la sidebar in mobile, poi passa a schermo intero. (la sidebar scompare)
+    BUG 2: ricarica la pagina a schermo intero, poi passa subito a mobile. (navbar si ridimensiona male se non c'è una tabella aperta)
+   -->
+
+
+
   <div class="modal fade" id="popup-container" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -677,7 +818,7 @@ body {
                                            document.getElementById('userDB').value,
                                            document.getElementById('passwordDB').value,
                                            document.getElementById('portDB').value)" 
-                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" data-bs-dismiss="modal">Connetti db</button>
+                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" id="conneti-db-btn">Connetti db</button>
             
     
             <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
@@ -769,14 +910,17 @@ body {
 <div  id="sidenav"class="sidenav">
   
   <br><br>
-  <a href="#contact">Logout</a>
-  
+  <button type="button" class="btn btn-danger" style="margin-left: 25%;" onclick="logout()">
+    <i class="fa fa-sign-out" aria-hidden="true"></i> Logout
+  </button>
+
+  <button href="" class="btn btn-outline-light" type="button" id="show-popup-btn"
+    data-bs-toggle="modal" data-bs-target="#popup-container" data-bs-toggle="modal">aggiungi db</button>
+
   <button id="dropdowndb-btn" class="dropdown-btn">database 
     <i class="fa fa-caret-down"></i>
   </button>
-  <div class="dropdown-container" id="dropdown2">
-    <a href="" type="button" data-bs-toggle="modal" data-bs-target="#popup-container" id="show-popup-btn" data-bs-toggle="modal" type="button" data-bs-target="#popup-container">+add-db</a>
-  </div>
+  <div class="dropdown-container" id="dropdown2"></div>
   <button id="droptabelle" class="dropdown-btn">Tabelle 
     <i class="fa fa-caret-down"></i>
   </button>
@@ -791,14 +935,11 @@ body {
     <button id="hamburger"   class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="#">dbPlain</a>
+    <a class="navbar-brand" href="#" style="margin-right: 0em;">
+      <!-- dbPlain -->
+      <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
+    </a>
     
-    <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-     
-      </ul>
-      
-    </div>
     <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
     
   </nav>

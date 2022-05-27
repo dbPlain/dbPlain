@@ -46,7 +46,7 @@
 										<div class="section text-center">
 											<h4 class="mb-4 pb-3">Log In</h4>
 
-											<form action="/autenticazione" method="POST">
+											<form action="" method="" id="login-form">
 
 												<div class="form-group">
 													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off">
@@ -56,12 +56,14 @@
 													<input type="password" name="password" class="form-style" placeholder="La tua Password" id="logpass" autocomplete="off">
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
-												<button type="submit" class="btn mt-4">Invia</button>
+
+												<div  class="alert alert-danger" role="alert" id="error_panel" style="margin: 10px;padding:10px;"> errore durante il login </div>
+
+												<button type="submit" class="btn mt-4" id="submit-btn-login">Invia</button>
 
 											</form>
 
                             				<p class="mb-0 mt-4 text-center"><a href="#0" class="link">Forgot your password?</a></p>
-											<div  class="alert alert-danger" id="errorp"> errore inserimento dati </div>
 											
 											<br>
 											<div class="other-login"> <!-- style="display: inline-block;" -->
@@ -80,7 +82,7 @@
 										<div class="section text-center">
 											<h4 class="mb-4 pb-3 card-upper-text">Registrati</h4>
 
-											<form action="/registrazione" method="POST">
+											<form action="/registrazione" method="POST" onsubmit="check_same_password()">
 
 												<div class="form-group">
 													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off">
@@ -93,12 +95,12 @@
 												</div>
 
 												<div class="form-group mt-2">
-													<input type="password" name="password" class="form-style" placeholder="Crea Password" id="logpass" autocomplete="off">
+													<input type="password" name="password" class="form-style" placeholder="Crea Password" id="crea-logpass" autocomplete="off">
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
 
 												<div class="form-group mt-2">
-													<input type="password" name="confermapassword" class="form-style" placeholder="Conferma Password" autocomplete="off">
+													<input type="password" name="confermapassword" class="form-style" placeholder="Conferma Password" id="conferma-logpass" autocomplete="off">
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
 

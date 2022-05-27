@@ -27,7 +27,10 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password != datirequest.confermapassword) res.send('errore pass diverse');
+	if (datirequest.password != datirequest.confermapassword) {
+		res.send('errore pass diverse');
+		return;
+	}
 	await utente.insert({
 		_id: t + '',
 		username: datirequest.username,
@@ -36,6 +39,7 @@ app.post('/registrazione', async (req, res) => {
 	});
 
 	res.redirect('/static/home/');
+	return;
 });
 /* var prova3 =  JSON.stringify(req.body) 
   var dati =  JSON.parse(prova3)
@@ -71,19 +75,25 @@ app.post('/autenticazione', async (req, res) => {
 
 	var query = { selector: { username: dati.username, password: dati.password } };
 
+	// TODO: distinguere i casi in cui l'utente è trovato ma la password è sbagliata, dai casi in cui l'utente non è trovato.
+
 	utente.find(query, function (error, body, headers) {
 		prova = JSON.stringify(error);
 		//let prova2 = JSON.parse(prova)
 		if (error) {
 			res.send(prova + 'errore');
 		} else {
+			let response_ajax = {};
 			if (body.bookmark == 'nil') {
-				res.cookie('datiUtente', { errore: true });
-				res.redirect('/static/login/');
+				// res.cookie('datiUtente', { errore: true });
+
+				response_ajax = { errore: 'utente non trovato..' };
+				res.status(404).send(JSON.stringify(response_ajax));
 			} else {
 				res.cookie('datiUtente', body);
-				res.redirect('/static/home/');
-				//res.send(body)
+
+				response_ajax = { redirect: '/static/home/' };
+				res.status(200).send(JSON.stringify(response_ajax));
 			}
 		}
 	});
@@ -637,15 +647,16 @@ app.post('/connessionedb', async (req, res) => {
 			res.send('errore');
 			pool.end(function (err) {
 				console.log(err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
 			});
 			return;
 		}
-		res.send('ok');
 	});
-	pool.end(function (err) {
-		console.log(err);
-	});
-	return;
 });
 
 app.post('/selezionaDatiTabelladinamico', async (req, res) => {
@@ -780,8 +791,6 @@ app.post('/insertriga', async (req, res) => {
 			return;
 		}
 	});
-
-	res.send('ok');
 });
 
 app.post('/updatedbutente', async (req, res) => {
