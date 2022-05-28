@@ -43,7 +43,6 @@ app.post('/registrazione', async (req, res) => {
 });
 /* var prova3 =  JSON.stringify(req.body) 
   var dati =  JSON.parse(prova3)
-  var prova =""
 
   var query = { selector: { username: dati.username  , password : dati.password } }
 
