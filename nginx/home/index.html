@@ -52,6 +52,7 @@
            $(document).ready(function(){
              
             const mediaQuery = window.matchMedia('(max-width: 576px)')
+            const mediaQuery2 = window.matchMedia('(max-width: 991px)')
             if (mediaQuery.matches) {
               console.log('entrato')
               $('#inseriscirigabutton').html('+')
@@ -61,17 +62,34 @@
 
             $(window).on('resize', function(){
 
-              if (mediaQuery.matches) {
+              if (mediaQuery2.matches) {
                 size_big = false;
-                $('#inseriscirigabutton').html('+')
-                $('#div-iniziale').attr('style', 'margin-left:150px')
-                $('#dati2').attr('style', 'margin-left:150px')
               } else {
                 size_big = true;
                 $('#hamburger').trigger('click');
+              }
+
+              if (mediaQuery.matches) {
+                $('#inseriscirigabutton').html('+')
+                $('#div-iniziale').attr('style', 'margin-left:150px')
+                $('#dati2').attr('style', 'margin-left:150px')
+                var navbarlaterale = document.getElementById("sidenav")
+                var grandezza2 = navbarlaterale.offsetWidth
+                if ( grandezza2 ==0 ) {
+                  $('#div-iniziale').attr('style', 'margin-left:0px')
+                  $('#dati2').attr('style', 'margin-left:0px')
+                }
+              } else {
+                
                 $('#inseriscirigabutton').html('Inserisci riga')
                 $('#div-iniziale').attr('style', 'margin-left:200px')
                 $('#dati2').attr('style', 'margin-left:200px')
+                var navbarlaterale = document.getElementById("sidenav")
+                var grandezza2 = navbarlaterale.offsetWidth
+                if ( grandezza2 ==0 ) {
+                  $('#div-iniziale').attr('style', 'margin-left:0px')
+                  $('#dati2').attr('style', 'margin-left:0px')
+                }
               }
 
               
@@ -110,14 +128,14 @@
 
              })
             $("#hamburger").click(function(){
-
+              console.log('sono fuori')
               if(sidenavbar == "si" && !size_big)
               {
                   sidenavbar = "no"
                   $("#sidenav").hide()
                   $('#dati2').attr('style', 'margin-left:0')
                   $('#div-iniziale').attr('style', 'margin-left:0');
-
+                  console.log('entrato qui')
                   setTimeout(function(){
                    var tbody = document.getElementById("testa")
                    var grandezza = tbody.offsetWidth 
@@ -1005,7 +1023,34 @@ body {
 
 
   <div class="main" id='div-iniziale'>
-    <h1>asdasdad</h1>
+
+    <div class="d-flex justify-content-center">
+
+      <div class="d-flex justify-content-center flex-column">
+        
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            <a href="#" class="card-link">Card link</a>
+            <a href="#" class="card-link">Another link</a>
+          </div>
+        </div>
+
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            <a href="#" class="card-link">Card link</a>
+            <a href="#" class="card-link">Another link</a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
   </div>
 
 <div id="dati2" class="main" style="display:none">
