@@ -110,16 +110,7 @@ $(function () {
 	};
 });
 
-// https://www.google.com/search?q=how+to+refresh+page+every+time+you+go+backwards+one+page&client=ubuntu&hs=ljs&channel=fs&ei=bKCLYsz5CK6C9u8Pk6uK6AE&oq=how+to+refresh+page+every+time+you+go+backward&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCCEQoAEyBQghEKABMgUIIRCgAToHCAAQRxCwAzoLCAAQgAQQsQMQgwE6EQguEIAEELEDEIMBEMcBEKMCOggIABCABBCxAzoICC4QgAQQ1AI6CwguELEDEIMBENQCOgsILhCABBCxAxCDAToFCC4QgAQ6CAguELEDEIMBOhEILhCABBCxAxCDARDHARDRAzoKCC4QxwEQ0QMQQzoECAAQQzoICC4QgAQQsQM6CAgAELEDEIMBOgUIABCABDoFCAAQsQM6BggAEB4QFjoECAAQEzoICAAQHhAWEBM6CAghEB4QFhAdOgcIIRAKEKABOgQIIRAVOgoIIRAeEA8QFhAdSgQIQRgASgQIRhgAUPoPWNxPYNhaaARwAXgBgAGWAogBgDeSAQYwLjQ0LjOYAQCgAQHIAQjAAQE&sclient=gws-wiz
-// https://stackoverflow.com/questions/43043113/how-to-force-reloading-a-page-when-using-browser-back-button
-// window.addEventListener( "pageshow", function ( event ) {
-// 	var historyTraversal = event.persisted ||
-// 						   ( typeof window.performance != "undefined" &&
-// 								window.performance.timeOrigin.type === 2);
-// 	if ( historyTraversal ) {
-// 	  window.location.reload();
-// 	}
-// });
+
 
 function setCookie(cname, cvalue, exdays) {
 	const d = new Date();

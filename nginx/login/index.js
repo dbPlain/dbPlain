@@ -99,24 +99,7 @@ $(function () {
 		});
 	});
 
-	// let prova = decodeURIComponent(document.cookie);
-	// console.log(prova);
 
-	// if (prova != undefined) var provasub = prova.substring(prova.indexOf('{'), prova.length);
-
-	// if (provasub != '') var valori = JSON.parse(provasub);
-
-	// $(document).ready(function () {
-	// 	var richiestacookie = new XMLHttpRequest();
-	// 	richiestacookie.open('post', 'http://localhost:8080/updatecookie', true);
-	// 	richiestacookie.onload = function () {};
-	// 	richiestacookie.send();
-	// 	$('#errorp').hide();
-	// 	if (valori != null && valori.errore) {
-	// 		$('#errorp').show();
-	// 	}
-	// 	document.cookie = 'name=document.cookie;max-age=0';
-	// });
 
 	// tag span si comporta come tag a (non più necessario in teoria)
 	window.transitionToPage = function (href) {
