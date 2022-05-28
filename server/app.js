@@ -16,6 +16,58 @@ app.use(compression());
 
 //const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use('utente');
+
+app.post("/deleteriga", async(req,res)=> {
+	var prova = JSON.stringify(req.body);
+	var prova2 = JSON.parse(prova);
+	const pool = new Pool({
+		user: prova2.USER,
+		host: prova2.HOST,
+		database: prova2.DB,
+		password: prova2.PASS,
+		port: prova2.PORT,
+
+	});
+
+	var listaCampi= prova2.LISTACAMPI
+	var listaValori= prova2.LISTAVALORI
+	var query = "delete from " +  prova2.TABELLA + " where "
+	var t = 0
+	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
+		pool.end(function (err) {
+			console.log(err);
+		});
+		
+		res.send("errore")
+	    return 
+}
+	else
+	{listaCampi.forEach(element => {
+		query = query + element + " = '" + listaValori[t] + "' and "
+		t++
+	
+	})};
+
+	query = query.substring(0,query.length-4)
+	
+	pool.query(query, (error, results, fields) => {
+		if (error) {
+			res.send(error);
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		}
+	});
+
+})
+
 //const utentelist =  utente.list()
 app.post('/registrazione', async (req, res) => {
 	var bodyrequest = JSON.stringify(req.body);

@@ -194,6 +194,30 @@
              $("#close-btn").click(function(){
                 $("#popup-container").hide()})
            })
+          //delete riga 
+          function sendDelete(listaCampi, listaValori)
+          {
+          var input = {"HOST" : infoDB.HOST, "DB" : infoDB.DB , "USER" : infoDB.USER, "PASS" : infoDB.PASS, "PORT" : infoDB.PORT,
+          "LISTAVALORI" : listaValori, "LISTACAMPI" : listaCampi , "TABELLA" : tabella
+        
+        
+        }
+          console.log(input);
+          console.log("listaValori " + listaValori)
+          console.log("listaCampi " + listaCampi)
+          var richiestaDelete = new XMLHttpRequest()
+             richiestaDelete.open("post", "http://localhost:8080/deleteriga" , true)
+             richiestaDelete.setRequestHeader("Content-Type", "application/json");
+             richiestaDelete.onload = function()
+             {
+              var risposta=richiestaDelete.response
+              console.log(risposta)
+             }
+             richiestaDelete.send(JSON.stringify(input))
+          }
+
+
+
            //inserti riga
           
            function sendInsert()
@@ -482,13 +506,31 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
 function eliminaRow(id)
 {
   console.log("elimina" + id)
+  var listaValori;
   $("#row"+id).each(function(index,item){ console.log(index + " "+ item)
-  var lista = item.innerText.split('\t')
-  listacut = lista.slice(1)
-  console.log(listacut)
+  lista = item.innerText.split('\t')
+  listaValori = lista.slice(1)
+  
+  console.log(index)
+  console.log(item.innerHTML)
+
 
   })
+  var listaCampi;
+  
+  $("#testa").each(function(index,item){ console.log(index + " "+ item)
+  lista = item.innerText.split('\t')
+  listaCampi = lista.slice(1)
+ 
+  console.log(index)
+  console.log(item.innerHTML)
+  
+
+  })
+
+
   $("#row"+id).remove()
+  sendDelete(listaCampi,listaValori);
   
 }
 
