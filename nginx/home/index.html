@@ -26,9 +26,12 @@
           var start = true 
           let prova = decodeURIComponent(document.cookie)
           var provasub = prova.substring(prova.indexOf("{"),prova.length)
-        
-          
-          var datiUtente = JSON.parse(provasub).docs[0]
+          try {
+            datiUtente = JSON.parse(provasub).docs[0]
+          } catch(e) {
+            datiUtente = {};
+            console.log( JSON.stringify(e) );
+          }
           console.log(datiUtente)
           
          if(datiUtente.listaDB != undefined){
@@ -44,6 +47,8 @@
           var tabella=""
           var infoDB ={}
           
+          var size_big = false;
+
            $(document).ready(function(){
              
             const mediaQuery = window.matchMedia('(max-width: 576px)')
@@ -57,15 +62,27 @@
             $(window).on('resize', function(){
 
               if (mediaQuery.matches) {
+                size_big = false;
                 $('#inseriscirigabutton').html('+')
+                $('#div-iniziale').attr('style', 'margin-left:150px')
+                $('#dati2').attr('style', 'margin-left:150px')
               } else {
+                size_big = true;
+                $('#hamburger').trigger('click');
                 $('#inseriscirigabutton').html('Inserisci riga')
+                $('#div-iniziale').attr('style', 'margin-left:200px')
+                $('#dati2').attr('style', 'margin-left:200px')
               }
+
+              
 
               setTimeout(function(){
                    var tbody = document.getElementById("testa")
                    var grandezza = tbody.offsetWidth 
                    console.log(grandezza)
+                   if (grandezza==0){
+                      grandezza = document.getElementById('div-iniziale').offsetWidth - 21;
+                   }
                    var navbarlaterale = document.getElementById("sidenav")
                    var grandezza2 = navbarlaterale.offsetWidth
                    console.log(grandezza2)
@@ -94,11 +111,12 @@
              })
             $("#hamburger").click(function(){
 
-              if(sidenavbar == "si")
+              if(sidenavbar == "si" && !size_big)
               {
                   sidenavbar = "no"
                   $("#sidenav").hide()
                   $('#dati2').attr('style', 'margin-left:0')
+                  $('#div-iniziale').attr('style', 'margin-left:0');
 
                   setTimeout(function(){
                    var tbody = document.getElementById("testa")
@@ -117,8 +135,14 @@
               {  
                 sidenavbar = "si"
                 $("#sidenav").show()
-                if ( mediaQuery.matches ) $('#dati2').attr('style', 'margin-left:150px')
-                else $('#dati2').attr('style', 'margin-left:200px')
+                if ( mediaQuery.matches ) {
+                  $('#dati2').attr('style', 'margin-left:150px')
+                  $('#div-iniziale').attr('style', 'margin-left:150px')
+                }
+                else {
+                  $('#dati2').attr('style', 'margin-left:200px')
+                  $('#div-iniziale').attr('style', 'margin-left:200px')
+                }
 
                 setTimeout(function(){
                    var tbody = document.getElementById("testa")
@@ -465,6 +489,8 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
 
                 contatore_riga = 0;
 
+                $('#div-iniziale').addClass('invisible')
+
                 setTabella(item.table_name)
                 document.getElementById("testa").remove()
                 
@@ -615,6 +641,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                    var variabile = (grandezza + grandezza2 + 21) 
                    var nabvar = document.getElementById("navbarprova")
                    nabvar.setAttribute("style", "width:"+variabile +"px !important;")
+                   var dimensione_ = document.getElementById("popup-container")
                    }, 250);                 
               })
 
@@ -634,8 +661,15 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
 
 
 function logout(){
-  alert('TODO: rimuovere i cookie')
-  window.location.replace('/static/')
+  setCookie('datiUtente', '', -1);
+  window.location.replace('/static/');
+}
+
+function setCookie(cname, cvalue, exdays) {
+	const d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	let expires = "expires="+ d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
     </script>
    
@@ -758,6 +792,31 @@ body {
   #dati2 {
     margin-left: 150px;
   }
+  #div-iniziale {
+    margin-left: 150px;
+  }
+
+  #show-popup-btn, #logout-sidebar {
+    margin-left: 16% !important;
+    width: 100px !important;
+    font-size: 15px;
+  }
+}
+
+.invisible {
+  display: none;
+}
+
+#show-popup-btn {
+  width:110px; margin-left: 22%; margin-bottom: 20px;
+}
+#logout-sidebar {
+  width: 110px;margin-left: 22%;margin-bottom: 20px; margin-top:10px;
+}
+
+.modal-backdrop {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 </style>
@@ -818,7 +877,7 @@ body {
                                            document.getElementById('userDB').value,
                                            document.getElementById('passwordDB').value,
                                            document.getElementById('portDB').value)" 
-                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" id="conneti-db-btn">Connetti db</button>
+                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" id="conneti-db-btn" type="button">Connetti db</button>
             
     
             <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
@@ -839,7 +898,7 @@ body {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Aggiungi un database</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Aggiungi una riga</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -910,12 +969,12 @@ body {
 <div  id="sidenav"class="sidenav">
   
   <br><br>
-  <button type="button" class="btn btn-danger" style="margin-left: 25%;" onclick="logout()">
+  <button type="button" class="btn btn-danger" id="logout-sidebar" onclick="logout()">
     <i class="fa fa-sign-out" aria-hidden="true"></i> Logout
   </button>
 
-  <button href="" class="btn btn-outline-light" type="button" id="show-popup-btn"
-    data-bs-toggle="modal" data-bs-target="#popup-container" data-bs-toggle="modal">aggiungi db</button>
+  <button href="" class="btn btn-success" type="button" id="show-popup-btn"
+    data-bs-toggle="modal" data-bs-target="#popup-container" data-bs-toggle="modal">aggiungi database</button>
 
   <button id="dropdowndb-btn" class="dropdown-btn">database 
     <i class="fa fa-caret-down"></i>
@@ -935,7 +994,7 @@ body {
     <button id="hamburger"   class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="#" style="margin-right: 0em;">
+    <a class="navbar-brand" href="/static/" style="margin-right: 0em;">
       <!-- dbPlain -->
       <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
     </a>
@@ -944,8 +1003,13 @@ body {
     
   </nav>
 
+
+  <div class="main" id='div-iniziale'>
+    <h1>asdasdad</h1>
+  </div>
+
 <div id="dati2" class="main" style="display:none">
-     
+
     <table     id="tabella" class="table table-bordered">
       <thead id="head">
         <tr id = "testa">
@@ -956,23 +1020,7 @@ body {
       </tbody>
     </table>
   
-</div>
-
-<div  id = "popupdierrore" style="position:relative;width:40% ; margin-left:40%; margin-top: 10%;"classs="container p-5">
-  <div class="row no-gutters">
-    <div >
-      <div class="alert alert-danger shadow my-3" role="alert" style="border-radius: 3px">
-        <button type="button" class="close" onclick='{$("#popupdierrore").hide()}' aria-label="Close">
-            <span aria-hidden="True" style="color:#721C24">&times;</span>
-        </button>
-        <div class="text-center">
-          <svg width="3em" height="3em" viewBox="0 0 16 16" class="m-1 bi bi-exclamation-circle-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
-          </svg>
-        </div>
-        <p style="font-size:18px" class="mb-0 font-weight-light"><b class="mr-1">Errore!</b>selezionare prima una tabella</p>
-      </div>
-    </div>    
+</div>  
   
 
 <script>

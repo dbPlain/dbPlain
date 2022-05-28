@@ -13,12 +13,20 @@
 	<script src="index.js" type="text/javascript"></script>
 
     <title>dbPlain</title>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/static/assets/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
+	<meta name="msapplication-TileColor" content="#00a300">
+	<meta name="theme-color" content="#60b56d">
 </head>
 <body class="text-center">      
         
 	<div class="transition transition-1 is-active"></div>
 
-	<a href="/static/t.html" class="logo" id="logo-login">
+	<a href="/static/" class="logo" id="logo-login">
 		<picture>
 			<source media="(max-width: 799px)" srcset="../assets/img/logo_dbplain_negativo.png">
 			<source media="(min-width: 800px)" srcset="../assets/img/logo+nome_dbplain_negativo.png">
@@ -49,11 +57,11 @@
 											<form action="" method="" id="login-form">
 
 												<div class="form-group">
-													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off">
+													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off" required>
 													<i class="input-icon fa-solid fa-user"></i>
 												</div>	
 												<div class="form-group mt-2">
-													<input type="password" name="password" class="form-style" placeholder="La tua Password" id="logpass" autocomplete="off">
+													<input type="password" name="password" class="form-style" placeholder="La tua Password" id="logpass" autocomplete="off" required>
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
 
@@ -82,27 +90,29 @@
 										<div class="section text-center">
 											<h4 class="mb-4 pb-3 card-upper-text">Registrati</h4>
 
-											<form action="/registrazione" method="POST" onsubmit="check_same_password()">
+											<form action="" method="" id="registrazione-form">
 
 												<div class="form-group">
-													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off">
+													<input type="text" name="username" class="form-style" placeholder="Il tuo Username" id="logemail" autocomplete="off" required>
 													<i class="input-icon fa-solid fa-user"></i>
 												</div>	
 
 												<div class="form-group mt-2">
-													<input type="email" name="email" class="form-style" placeholder="La tua Email"  autocomplete="off">
+													<input type="email" name="email" class="form-style" placeholder="La tua Email"  autocomplete="off" required>
 													<i class="input-icon fa-at"></i>
 												</div>
 
 												<div class="form-group mt-2">
-													<input type="password" name="password" class="form-style" placeholder="Crea Password" id="crea-logpass" autocomplete="off">
+													<input type="password" name="password" class="form-style" placeholder="Crea Password" id="crea-logpass" autocomplete="off" required>
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
 
 												<div class="form-group mt-2">
-													<input type="password" name="confermapassword" class="form-style" placeholder="Conferma Password" id="conferma-logpass" autocomplete="off">
+													<input type="password" name="confermapassword" class="form-style" placeholder="Conferma Password" id="conferma-logpass" autocomplete="off" required>
 													<i class="input-icon fa-solid fa-key"></i>
 												</div>
+
+												<div  class="alert alert-danger" role="alert" id="error_panel_signup" style="margin: 10px;padding:10px;">errore durante la registrazione</div>
 
 												<button type="submit" class="btn mt-4">Invia</button>
 

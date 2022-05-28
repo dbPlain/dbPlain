@@ -27,8 +27,8 @@ app.post('/registrazione', async (req, res) => {
 	//var c = corpoString.total_rows
 	var l = dati.total_rows;
 	t = l + 1;
-	if (datirequest.password != datirequest.confermapassword) {
-		res.send('errore pass diverse');
+	if (datirequest.password != datirequest.confermapassword || datirequest.password.length < 5) {
+		res.status(404).send(JSON.stringify({ errore: 'password diverse' }));
 		return;
 	}
 	await utente.insert({
@@ -38,7 +38,28 @@ app.post('/registrazione', async (req, res) => {
 		email: datirequest.email,
 	});
 
-	res.redirect('/static/home/');
+	var query = { selector: { username: datirequest.username, password: datirequest.password } };
+	utente.find(query, function (error, body, headers) {
+		// prova = JSON.stringify(error);
+		//let prova2 = JSON.parse(prova)
+		if (error) {
+			res.send(prova + 'errore');
+		} else {
+			let response_ajax = {};
+			if (body.bookmark == 'nil') {
+				// res.cookie('datiUtente', { errore: true });
+				// response_ajax = { errore: 'utente non trovato..' };
+				// res.status(404).send(JSON.stringify(response_ajax));
+			} else {
+				res.cookie('datiUtente', body);
+
+				response_ajax = { redirect: '/static/home/' };
+				res.status(200).send(JSON.stringify(response_ajax));
+				return;
+			}
+		}
+	});
+	// res.redirect('/static/home/');
 	return;
 });
 /* var prova3 =  JSON.stringify(req.body) 
@@ -77,7 +98,7 @@ app.post('/autenticazione', async (req, res) => {
 	// TODO: distinguere i casi in cui l'utente è trovato ma la password è sbagliata, dai casi in cui l'utente non è trovato.
 
 	utente.find(query, function (error, body, headers) {
-		prova = JSON.stringify(error);
+		// prova = JSON.stringify(error);
 		//let prova2 = JSON.parse(prova)
 		if (error) {
 			res.send(prova + 'errore');
@@ -652,8 +673,8 @@ app.post('/connessionedb', async (req, res) => {
 			res.send('ok');
 			pool.end(function (err) {
 				console.log(err);
+				return;
 			});
-			return;
 		}
 	});
 });

@@ -75,6 +75,30 @@ $(function () {
 		});
 	});
 
+	$('#error_panel_signup').addClass('non-visibile');
+	$('#registrazione-form').on('submit', function (e) {
+		e.preventDefault(); // avoid to execute the actual submit of the form
+		let form = $(this);
+
+		$.ajax({
+			type: 'POST',
+			url: '/registrazione',
+			data: form.serialize(),
+			success: function (data) {
+				let red = JSON.parse(data).redirect;
+				window.location.replace(red);
+			},
+			statusCode: {
+				404: function (data) {
+					$('#error_panel_signup').removeClass('non-visibile');
+					setTimeout(function () {
+						$('#error_panel_signup').addClass('non-visibile');
+					}, 4000);
+				},
+			},
+		});
+	});
+
 	// let prova = decodeURIComponent(document.cookie);
 	// console.log(prova);
 
