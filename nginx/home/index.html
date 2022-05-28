@@ -480,12 +480,8 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
                  { 
                   
                    poperrore()
-                 }
-                 
-                   
-           }
-
-             
+                 }                  
+           }            
          }
   richiesta.send(JSON.stringify(datiDB))
 
@@ -668,15 +664,10 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                       t=2
                       tbody.appendChild(tr2)
                      
-                      //th.innerHTML=item.column_name
-                     // tr.appendChild(th)
-                    
+
                     })
                    }
                   
-                  
-                // dimensiona()
-                 
                 var risorsePost = {"HOST" : datiDataBase.HOST, 
                                    "DB" : datiDataBase.DB,
                                    "USER" : datiDataBase.USER, 
@@ -689,10 +680,6 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
                 var divDati = document.getElementById("dati2")
                 divDati.style.display="block"
          
-              
-              
-
-
                 setTimeout(function(){
                    var tbody = document.getElementById("testa")
                    var grandezza = tbody.offsetWidth 
@@ -745,30 +732,11 @@ function setCookie(cname, cvalue, exdays) {
 #close-btn{
   float: right;
 }
-/* #popup-container{
-  position: absolute;
-  left: 25%;
-  top: 10%;
-  width: 35%;
-  height: 75%;
-  padding: 20px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  box-shadow: 0px 0px 10px #ccc;
-} */
+
 #close-btn2{
   float: right;
 }
-/* #popup-container2{
-  position: absolute;
-  background-color: #eee;
-  left: 25%;
-  top: 10%;
-  width: 45%;
-  padding: 20px;
-  border: 1px solid rgb(120, 100, 100);
-  
-} */
+
 body {
   font-family: "Lato", sans-serif;
 }
