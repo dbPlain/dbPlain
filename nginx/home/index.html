@@ -22,17 +22,22 @@
     //return null;
     
           var contatore_riga = 0;
-
+          var nome = ""
           var start = true 
           let prova = decodeURIComponent(document.cookie)
           var provasub = prova.substring(prova.indexOf("{"),prova.length)
+          console.log(provasub)
           try {
             datiUtente = JSON.parse(provasub).docs[0]
+            nome = datiUtente.username
+            console.log(nome)
+            
           } catch(e) {
             datiUtente = {};
+            
             console.log( JSON.stringify(e) );
           }
-          console.log(datiUtente)
+         
           
          if(datiUtente.listaDB != undefined){
           datiUtente.listaDB.forEach( datidbcookie =>{
@@ -46,11 +51,12 @@
           
           var tabella=""
           var infoDB ={}
+          var infoDB2 ={}
           
           var size_big = false;
 
            $(document).ready(function(){
-             
+            $("#titolo").text("Ciao "+nome+"!")
             const mediaQuery = window.matchMedia('(max-width: 576px)')
             const mediaQuery2 = window.matchMedia('(max-width: 991px)')
             if (mediaQuery.matches) {
@@ -59,6 +65,11 @@
             } else {
                 $('#inseriscirigabutton').html('Inserisci riga')
             }
+
+            $("#pop-trigger").click(function(){
+
+              $("#show-popup-btn").trigger("click")
+            })
 
             $(window).on('resize', function(){
 
@@ -97,9 +108,11 @@
               setTimeout(function(){
                    var tbody = document.getElementById("testa")
                    var grandezza = tbody.offsetWidth 
-                   console.log(grandezza)
+                   
                    if (grandezza==0){
+                      console.log("ecco")
                       grandezza = document.getElementById('div-iniziale').offsetWidth - 21;
+                      console.log(grandezza)
                    }
                    var navbarlaterale = document.getElementById("sidenav")
                    var grandezza2 = navbarlaterale.offsetWidth
@@ -380,8 +393,8 @@
 
                $("#dropdown2").append('<a name='+dati+' id='+dati.DB + dati.HOST+' href="#">'+dati.DB+'</a>')
                $("#"+dati.DB + dati.HOST).click(function(){
-                  infoDB = dati
-                  
+                 // infoDB = dati
+                  infoDB2 = dati 
                   // tiene illuminato il database selezionato
                   $("#dropdown2").children().css({
                       "color": "", 
@@ -502,6 +515,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               aCampo.innerHTML = item.table_name
               aCampo.setAttribute('id', item.table_name + '202')
               aCampo.addEventListener("click" , function(){
+                infoDB = infoDB2
                 $('#inseriscirigabutton').show()
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
 
@@ -1024,32 +1038,34 @@ body {
 
   <div class="main" id='div-iniziale'>
 
-    <div class="d-flex justify-content-center">
+    
+    <div class="d-flex justify-content-center" >
 
-      <div class="d-flex justify-content-center flex-column">
-        
-        <div class="card" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#" class="card-link">Card link</a>
-            <a href="#" class="card-link">Another link</a>
+      <div class="d-flex justify-content-around flex-column"style="width: 30rem !important;max-width: 100% !important;">
+        <div class="card" style=" background-color:#E7F7CC;max-width: 100% !important;">
+          <div class="card-body" >
+            <h5 class="card-title" > <strong id="titolo">Ciao!</strong> </h5>
+            <br>
+            
+            <p class="card-text"> In questa pagina puoi visualizzare e lavorare su tutti i tuoi database in modo semplice e veloce</p>
+            
+            <button type="button"  id="pop-trigger"class="btn btn-outline-success">Aggiugni un db ora!</button>
+           
           </div>
         </div>
 
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="background-color:#E7F7CC;max-width: 100% !important;" >
           <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            <a href="#" class="card-link">Card link</a>
-            <a href="#" class="card-link">Another link</a>
+            <h5 class="card-title"><strong>Gestisci tutte le tue tabelle</strong></h5>
+            <br>
+            <p class="card-text">Una volta aggiunto e selezionato un database avrai la possibilià di gestire tutte le tabelle al suo interno</p>
+
           </div>
         </div>
       </div>
-      
     </div>
+      
+   
     
   </div>
 
