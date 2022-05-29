@@ -577,15 +577,6 @@ ora da app.js posso usaree il token per il mio obiettivo
 
 /*** fine GOOGLE LOGIN ***/
 
-var server = app.listen(process.env.PORT, function () {
-	var host = server.address().address;
-	var port = server.address().port;
-
-	console.log('Example app listening at http://%s:%s', host, port);
-});
-
-module.exports = app; // for testing
-
 // function inserisciQualcosa(db)
 // {
 
@@ -940,3 +931,13 @@ app.post('/updatedbutente', async (req, res) => {
 		}
 	});
 });
+
+
+var server = app.listen(process.env.PORT, function () {
+	var host = server.address().address;
+	var port = server.address().port;
+
+	console.log('Example app listening at http://%s:%s', host, port);
+});
+
+module.exports = server; // for testing
