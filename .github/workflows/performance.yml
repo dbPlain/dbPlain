@@ -1,0 +1,16 @@
+name: "Performance: Lighthouse"
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, reopened ]
+
+jobs:
+  lighthouse:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v3
+      - name: Lighthouse
+        uses: foo-software/lighthouse-check-action@master
+        with:
+          urls: 'https://www.foo.software,https://www.google.com'

@@ -1,0 +1,35 @@
+name: "Security: CodeQL"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # https://crontab.guru/
+  # schedule:
+  #   - cron: '30 1 * * 0'
+
+jobs:
+
+  CodeQL-Analyze:
+
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Initialize the CodeQL tools for scanning
+      uses: github/codeql-action/init@v2
+      with:
+        languages: javascript
+          # CodeQL's query packs : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+          # queries: +security-and-quality
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
