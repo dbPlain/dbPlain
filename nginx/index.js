@@ -1,6 +1,6 @@
 $(function () {
-	/* display nav (service-login/logout) */
-	// service non accessibile
+	/* display nav bar (service-login/logout) */
+	// database non accessibile
 	$('#entra_db').attr('style', 'pointer-events: none');
 	$('#entra_db_genitore').removeClass('nav-item');
 	$('#entra_db').addClass('link-not-clickable');
@@ -16,7 +16,7 @@ $(function () {
 	}
 	if (datiUtente) {
 		// è loggato, allora..
-		// service accessibile
+		// database accessibile
 		$('#entra_db').removeAttr('style');
 		$('#entra_db_genitore').addClass('nav-item');
 		$('#entra_db').removeClass('link-not-clickable');
@@ -26,10 +26,11 @@ $(function () {
 		$('#logout-nav').removeClass('invisible');
 	}
 	// logout logica
+	// cancella i cookie
 	$('#logout-nav').on('click', function () {
 		setCookie('datiUtente', '', -1);
 
-		// service non accessibile
+		// database non accessibile
 		$('#entra_db').attr('style', 'pointer-events: none');
 		$('#entra_db_genitore').removeClass('nav-item');
 		$('#entra_db').addClass('link-not-clickable');
@@ -38,10 +39,11 @@ $(function () {
 		$('#logout-nav').addClass('invisible');
 	});
 
-	// Animation
+	// Animazione del titolo 
 	$('body.hero-anime').removeClass('hero-anime');
 
 	// Responsive Navbar desktop
+	// Fa un controllo sullo scroll
 	let header = $('#navbar-res');
 	$(window).on('scroll', function () {
 		let scroll = $(window).scrollTop();
@@ -53,10 +55,10 @@ $(function () {
 		}
 	});
 
-	// Navigation on mobile
+	// Nav bar sul telefono
 	let body = undefined;
-	let menu = undefined;
-	let menuItems = undefined;
+	let menu = undefined;  // le tre linee a destra
+	let menuItems = undefined; // le scritte del menu 
 	var init = function init() {
 		body = document.querySelector('body');
 		menu = document.querySelector('.menu-icon');
@@ -65,16 +67,17 @@ $(function () {
 	};
 	var applyListeners = function applyListeners() {
 		menu.addEventListener('click', function () {
-			return toggleClass(body, 'nav-active');
+			return toggleClass(body, 'nav-active');  
 		});
 	};
 	var toggleClass = function toggleClass(element, stringClass) {
 		if (element.classList.contains(stringClass)) element.classList.remove(stringClass);
 		else element.classList.add(stringClass);
 	};
-	init();
+	init(); 
 	// se lo schermo si ingrandisce e body ha ancora la classe nav-active
 	// (perché l'utente non l'ha tolta ripremendo l'icona a destra), then togliere la classe
+	// si assicura che quando non è presente il bottone ( tre linne) non ci sia la classe nav- active ( lo schermo nero)
 	$(window).on('resize', function () {
 		if ($(window).width() > 767 && body.classList.contains('nav-active')) body.classList.remove('nav-active');
 	});
@@ -100,14 +103,6 @@ $(function () {
 	}
 	scrollBanner();
 
-	// span works like a link (ci serve ancora?)
-	window.transitionToPage = function (href) {
-		$('.navigation-wrap').addClass('navigation-back');
-
-		setTimeout(function () {
-			window.location.href = href;
-		}, 500);
-	};
 });
 
 

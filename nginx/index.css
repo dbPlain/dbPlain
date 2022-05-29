@@ -9,7 +9,7 @@
 	--secondario-scuro: #195962;
 	--grigio-chiaro: #c4c3ca;
 	--grigio-scuro: #3f423f;
-	--bianco: #fff; /* al posto di #212112 */
+	--bianco: #fff; 
 }
 
 
@@ -24,7 +24,7 @@ body{
     transition: all 200ms linear;
 
 	color: var(--bianco);
-	background-color: var(--colore-scuro); /* #1f2029 */
+	background-color: var(--colore-scuro); 
 }
 
 /* background image parallax */
@@ -40,6 +40,7 @@ body{
 	color: #fefefe;
 	background-color: var(--verde-scuro);
 }
+/* per supporto a firefox  */
 ::-moz-selection {
 	color: #fefefe;
 	background-color: var(--verde-scuro);
@@ -193,17 +194,19 @@ p{
     transition: all 300ms linear;
     transition-delay: 1700ms;
 }
-body.hero-anime p{
-	opacity: 0;
-	transform: translateY(40px);
-    transition-delay: 1700ms;
-}
 h1 span{
 	display: inline-block;
     transition: all 300ms linear;
 	opacity: 1;
 	transform: translate(0);
 }
+
+body.hero-anime p{
+	opacity: 0;
+	transform: translateY(40px);
+    transition-delay: 1700ms;
+}
+/* figli span lettera per lettera */
 body.hero-anime h1 span:nth-child(1){
 	opacity: 0;
 	transform: translateY(-20px);
@@ -260,22 +263,8 @@ h1 span:nth-child(7){
 }
 
 body.hero-anime {
-	/* navbar a inizio caricamento si muove come il testo */
 	opacity: 0;
-	/* transform: translateY(40px);
-    transition-delay: 1900ms; */
 }
-
-/* per rimuovere delay della scritta a inizio caricamento: */
-/* h1 span{
-    transition-delay: 0ms !important;
-}
-p{
-	color: #fff;
-    transition-delay: 0ms !important;
-} */
-
-
 
 
 @media screen and (max-width: 767px) { 
@@ -590,7 +579,7 @@ body.nav-active .nav__list-item:nth-child(7) {
 /********************************
 		centro pagina
 ********************************/
-
+/* scritta database sullo sfondo a sinistra  */
 .shadow-title{
 	position: fixed;
 	top: 0;
@@ -599,7 +588,7 @@ body.nav-active .nav__list-item:nth-child(7) {
 	width: 100%;
 	height: 300%;
 	text-align: left;
-	font-family: 'Muli', sans-serif;
+	font-family: 'Mulish', sans-serif;
 	-webkit-writing-mode: vertical-lr;
 	writing-mode: vertical-lr;
 	font-size: 18vw;
@@ -656,24 +645,16 @@ body.nav-active .nav__list-item:nth-child(7) {
 ******************************************/
 
 .wrapper {
-	/* The height needs to be set to a fixed value for the effect to work.
-	 * 100vh is the full height of the viewport. */
 	height: 200vh;
-	/* The scaling of the images would add a horizontal scrollbar, so disable x overflow. */
-	overflow-x: hidden;
-	/* Enable scrolling on the page. */
-	overflow-y: auto;
-	/* Set the perspective to 2px. This is essentailly the simulated distance from the viewport to transformed objects.*/
+	overflow: hidden;
 	perspective: 2px;
 }
   
 .section-transizione {
-	/* Needed for children to be absolutely positioned relative to the parent. */
 	position: relative;
-	/* The height of the container. Must be set, but it doesn't really matter what the value is. */
 	height: 100vh;
 
-	/* For text formatting. */
+	/* Text formatting. */
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -696,21 +677,16 @@ body.nav-active .nav__list-item:nth-child(7) {
 	bottom: 0;
 	left: 0;
 
-	/* Move the pseudo-element back away from the camera,
-		* then scale it back up to fill the viewport.
-		* Because the pseudo-element is further away, it appears to move more slowly, like in real life. */
 	transform: translateZ(-1px) scale(1.5);
-	/* Force the background image to fill the whole element. */
 	background-size: 100%;
-	/* Keep the image from overlapping sibling elements. */
 	z-index: -1;
 }
   
-/* The styling for the static div. */
 .static {
 	background: var(--verde-scuro);
 }
 
+/* media query per assicurarci che i contenuti della pagina di adattassero a tutti i dispositivi  */
 @media screen and (max-width: 768px) {
 	.paragrafo {
 		font-size: small;
@@ -743,9 +719,6 @@ body.nav-active .nav__list-item:nth-child(7) {
 		height: 160vh;
 	}
 }
-
-/* TODO: non funziona iphone SE orizzontale */
-
 
 /* Stile commenti con icone */
 
