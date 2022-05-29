@@ -98,16 +98,6 @@ $(function () {
 			},
 		});
 	});
-
-
-
-	// tag span si comporta come tag a (non più necessario in teoria)
-	window.transitionToPage = function (href) {
-		alert(href);
-		setTimeout(function () {
-			window.location.href = href;
-		}, 500);
-	};
 });
 
 // transizione iniziale
