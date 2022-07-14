@@ -24,7 +24,7 @@
       
      
         //variabile globali file  home
-    
+  
           var contatore_riga = 0;
           var nome = ""
           var start = true 
@@ -724,6 +724,12 @@ function setCookie(cname, cvalue, exdays) {
 	let expires = "expires="+ d.toUTCString();
 	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
+
+
+function redirect_tabelle(){
+  window.location.href = '/static/home/tabella.html?tabella='+tabella; //+'&infodb='+JSON.stringify(infoDB)
+}
+
     </script>
    
 
@@ -980,6 +986,8 @@ body {
       <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
     </a>
     
+    <button type="button" class="btn btn-success" onclick="redirect_tabelle()">tabella</button>
+
     <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
     
   </nav>

@@ -114,27 +114,110 @@ app.post('/registrazione', async (req, res) => {
 	// res.redirect('/static/home/');
 	return;
 });
-/* var prova3 =  JSON.stringify(req.body) 
-  var dati =  JSON.parse(prova3)
 
-  var query = { selector: { username: dati.username  , password : dati.password } }
 
-    utente.find(query,function (error, body , headers){
-    
-    prova = JSON.stringify(error)
-    prova2 = JSON.parse(prova)
-    if(error) 
-    {
-      res.send(prova + "errore")
-    }
-    else 
-    {  
-      if (body.bookmark == "nil") res.send("<h4>CREDENZIALI ERRATE</h4>") 
-      else{
-        res.redirect("static/home.html")
-      } 
-      
-    }*/
+/*** GOOGLE LOGIN ***/
+
+// app.get('/users/auth/google_oauth2', function(req,res){
+//   googleOAuth.Google_RequestCode(req,res)
+// })
+
+// app.get('/users/auth/google_oauth2/callback', function(req,res){
+//   var google_authcode = req.query.code;
+//   googleOAuth.Google_GetToken(req,res, google_authcode);
+// })
+
+app.get(
+	'/users/auth/google_oauth2',
+	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
+	function already_Authenticated(req, res) {
+		res.redirect('/static/home/');
+	}
+);
+
+app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, async function Google_Token_Response(req, res) {
+	var data_from_google = req.decoded_body;
+	var info_utente = {
+		// unique_id: data_from_google.sub,
+		email: data_from_google.email,
+		name: data_from_google.name,
+		// propic: data_from_google.picture,
+		expire_time: Date.now() + data_from_google.exp * 1000,
+	};
+
+	let corpo = await couchdb.db.use('utente').list();
+	let corpoString = JSON.stringify(corpo);
+	let dati = JSON.parse(corpoString);
+	var t = corpo.total_rows;
+	t += 1;
+	// res.send(t + ' ' + info_utente.email + ' ' + info_utente.name)
+	var query = { selector: { username: info_utente.name, email: info_utente.email } };
+	utente.find(query, async function (error, body, headers) {
+		// prova = JSON.stringify(error);
+		//let prova2 = JSON.parse(prova)
+		if (error) {
+			res.send(prova + 'errore');
+		} else {
+			if (body.bookmark == 'nil') {
+
+				await utente.insert({
+					_id: t + '',
+					username: info_utente.name,
+					email: info_utente.email,
+					password:''
+				});
+				res.redirect('/static/home/');
+
+			} else {
+				res.cookie('datiUtente', body);
+				res.redirect('/static/home/');
+				return;
+			}
+		}
+	});
+
+	return;
+
+	// res.cookie('googleLogin', info_utente, { httpOnly: true }); // set cookie
+	// res.redirect('/static/home/');
+});
+
+// app.get('/elimina', function (req, res) {
+// 	res.clearCookie('googleLogin');
+// 	res.redirect('/');
+// 	res.end();
+// });
+
+// app.get('/test', function (req, res) {
+// 	res.send(
+// 		"Benvenuto/a!<br> <img src='" +
+// 			req.cookies.googleLogin.propic +
+// 			"' atl=''/>" +
+// 			req.cookies.googleLogin.name +
+// 			'<br><br><br>Questo cookie durerà fino a ' +
+// 			req.cookies.googleLogin.expire_time +
+// 			'<br>per sloggarti: <button onclick=\'location.href = "/elimina"\';>log out</button>'
+// 	);
+// });
+
+/*
+da: per esempio dall'index.html tramite una form) href (nè get nè post.. in teoria get, al massimo..)
+.. incoming call per /users/auth/google_oauth2 ---reindirizza---> google_requestCode: richiede a google l'auth code dell'utente
+google_requestCode:ricevuto ---reindirizza---> /users/auth/google_oauth2/callback ---reindirizza---> Google_GetToken: richiede a google l'access token (per lo "scope" originario)
+Google_GetToken:ricevuto ---reindirizza---> /orario2
+
+SCHEMA: https://developers.google.com/identity/protocols/oauth2
+
+--> /users/auth/google_oauth2 --> Google_RequestCode --> google
+/users/auth/google_oauth2/callback <-- Google_RequestCode <-- google (autentifica l'utente e manda l'auth code alla web app richiedente)
+/users/auth/google_oauth2/callback --> Google_GetToken --> google 
+/orario2 <-- Google_GetToken <-- google (concede un access token al richiedente)
+ora da app.js posso usaree il token per il mio obiettivo
+*/
+
+/*** fine GOOGLE LOGIN ***/
+
+
 app.post('/updatecookie', async (req, res) => {
 	res.cookie('datiUtente', { errore: false });
 	res.redirect('/static/login/');
@@ -510,73 +593,6 @@ app.post('/orario', function (req, res) {
 
 /* fine LOGIN (form) */
 
-/*** GOOGLE LOGIN ***/
-
-// app.get('/users/auth/google_oauth2', function(req,res){
-//   googleOAuth.Google_RequestCode(req,res)
-// })
-
-// app.get('/users/auth/google_oauth2/callback', function(req,res){
-//   var google_authcode = req.query.code;
-//   googleOAuth.Google_GetToken(req,res, google_authcode);
-// })
-
-app.get(
-	'/users/auth/google_oauth2',
-	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
-	function already_Authenticated(req, res) {
-		res.redirect('/static/home/');
-	}
-);
-
-app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, function Google_Token_Response(req, res) {
-	var data_from_google = req.decoded_body;
-	var info_utente = {
-		unique_id: data_from_google.sub,
-		email: data_from_google.email,
-		name: data_from_google.name,
-		propic: data_from_google.picture,
-		expire_time: Date.now() + data_from_google.exp * 1000,
-	};
-	res.cookie('googleLogin', info_utente, { httpOnly: true }); // set cookie
-	res.redirect('/static/home/');
-});
-
-app.get('/orario2', function (req, res) {
-	res.send(
-		"Benvenuto/a!<br> <img src='" +
-			req.cookies.googleLogin.propic +
-			"' atl=''/>" +
-			req.cookies.googleLogin.name +
-			'<br><br><br>Questo cookie durerà fino a ' +
-			req.cookies.googleLogin.expire_time +
-			'<br>per sloggarti: <button onclick=\'location.href = "/elimina"\';>log out</button>'
-	);
-});
-
-app.get('/elimina', function (req, res) {
-	res.clearCookie('googleLogin');
-	res.redirect('/');
-	res.end();
-});
-
-/*
-da: per esempio dall'index.html tramite una form) href (nè get nè post.. in teoria get, al massimo..)
-.. incoming call per /users/auth/google_oauth2 ---reindirizza---> google_requestCode: richiede a google l'auth code dell'utente
-google_requestCode:ricevuto ---reindirizza---> /users/auth/google_oauth2/callback ---reindirizza---> Google_GetToken: richiede a google l'access token (per lo "scope" originario)
-Google_GetToken:ricevuto ---reindirizza---> /orario2
-
-SCHEMA: https://developers.google.com/identity/protocols/oauth2
-
---> /users/auth/google_oauth2 --> Google_RequestCode --> google
-/users/auth/google_oauth2/callback <-- Google_RequestCode <-- google (autentifica l'utente e manda l'auth code alla web app richiedente)
-/users/auth/google_oauth2/callback --> Google_GetToken --> google 
-/orario2 <-- Google_GetToken <-- google (concede un access token al richiedente)
-ora da app.js posso usaree il token per il mio obiettivo
-*/
-
-/*** fine GOOGLE LOGIN ***/
-
 // function inserisciQualcosa(db)
 // {
 
@@ -739,7 +755,6 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
             password: "adminpass",
             port: "5432"
           });*/
-
 	pool.query('select * from  ' + prova2.tabella + ' limit 100', function (err, res2) {
 		res.send(res2);
 	});
@@ -765,32 +780,6 @@ app.post('/tabelledb', async (req, res) => {
               password: "adminpass",
               port: "5432"
             });*/
-
-	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) {
-			res.send(err);
-			pool.end(function (err) {
-				console.log(err);
-			});
-			return;
-		} else res.send(res2);
-	});
-	pool.end(function (err) {
-		console.log(err);
-	});
-	return;
-});
-
-app.post('/tabelledb', async (req, res) => {
-	var prova = JSON.stringify(req.body);
-	var prova2 = JSON.parse(prova);
-	const pool = new Pool({
-		user: prova2.USER,
-		host: prova2.HOST,
-		database: prova2.DB,
-		password: prova2.PASS,
-		port: prova2.PORT,
-	});
 
 	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
 		if (err) {
@@ -931,6 +920,11 @@ app.post('/updatedbutente', async (req, res) => {
 		}
 	});
 });
+
+
+app.get('/pagina_dati', (req,res) => {
+	
+})
 
 
 var server = app.listen(process.env.PORT, function () {
