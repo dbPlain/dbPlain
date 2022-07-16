@@ -17,6 +17,250 @@ app.use(compression());
 //const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use('utente');
 
+
+
+app.post("/update/dati/tabella", async(req,res)=> {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+
+	});
+    
+	var listaCampi= datiDB.LISTACAMPI
+	var listaValori= datiDB.LISTAVALORI
+	var listaCampiInsert= datiDB.LISTACAMPIINSERT
+	var listaValoriInsert= datiDB.LISTAVALORIINSERT
+     
+
+
+
+	if( listaValoriInsert== undefined || listaValoriInsert == null || listaValoriInsert.length==0 ){
+		pool.end(function (err) {
+			console.log(err);
+		});
+		
+		res.send("errore")
+	    return 
+} 
+
+
+	var t = 0
+	var setString = ""
+	listaCampiInsert.forEach(element => {
+		setString =  setString + element + " = '" + listaValoriInsert[t] + "'    ,"
+		t++
+	
+	})
+	t=0
+	setString = setString.substring(0,setString.length-4)
+	var query = "update " +  datiDB.TABELLA + " set " + setString+ " where "
+	
+	
+	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
+		pool.end(function (err) {
+			console.log(err);
+		});
+		
+		res.send("errore")
+	    return 
+} 
+	else
+	{listaCampi.forEach(element => {
+		query = query + element + " = '" + listaValori[t] + "' and "
+		t++
+	
+	})};
+
+	query = query.substring(0,query.length-4)
+	
+	
+	pool.query(query, (error, results, fields) => {
+		if (error) {
+			res.send(error);
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		}
+	});
+
+})
+
+
+//inizio API ESTERNE
+app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+
+	});
+where = datiDB.where
+	
+    
+	pool.query('select * from  ' + datiDB.tabella + ' where'+ where, function (err, res2) {
+		if (err) res.send(err)
+		res.send(res2);
+
+	});
+	pool.end(function (err) {
+		console.log(err);
+	});
+});
+
+app.post('/seleziona/dati/tabella', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+
+	});
+    
+	pool.query('select * from  ' + datiDB.tabella, function (err, res2) {
+		res.send(res2);
+	});
+	pool.end(function (err) {
+		console.log(err);
+	});
+});
+app.post("/delete/dati/tabella", async(req,res)=> {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+
+	});
+
+	var listaCampi= datiDB.LISTACAMPI
+	var listaValori= datiDB.LISTAVALORI
+	var query = "delete from " +  datiDB.TABELLA + " where "
+	var t = 0
+	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
+		pool.end(function (err) {
+			console.log(err);
+		});
+		
+		res.send("errore")
+	    return 
+}
+	else
+	{listaCampi.forEach(element => {
+		query = query + element + " = '" + listaValori[t] + "' and "
+		t++
+	
+	})};
+
+	query = query.substring(0,query.length-4)
+	
+	pool.query(query, (error, results, fields) => {
+		if (error) {
+			res.send(error);
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		}
+	});
+
+})
+
+app.post('/insert/dati/tabella', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+	});
+	var campi = '';
+	var valori = '';
+	var pass = 0;
+	var out = '';
+	for (var key in datiDB) {
+		//var key2 = toString(key)
+
+		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
+			if (pass < 2) {
+				if (pass == 1) {
+					campi = campi + key;
+					valori = valori + "'" + datiDB[key] + "'";
+				}
+				pass++;
+			} else {
+				campi = campi + ', ' + key;
+				valori = valori + ", '" + datiDB[key] + "'";
+			}
+		}
+	}
+	if (campi == '')  res.send("nessun campo inserito")
+	var query = 'INSERT INTO ' + datiDB.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
+
+	pool.query(query, async (error) => {
+		if (error) {
+			res.send(error + datiDB.DB);
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		}
+	});
+});
+
+app.post("/analisi/filtri/tabella")
+{
+	
+}
+
+
+
+
+
+//fine API ESTERNE 
+
+
+
+
+
+
+
+
 app.post("/deleteriga", async(req,res)=> {
 	var prova = JSON.stringify(req.body);
 	var prova2 = JSON.parse(prova);
