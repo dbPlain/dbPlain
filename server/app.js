@@ -1,25 +1,100 @@
 var request = require('request');
 var express = require('express');
-var app = express();
+const app = express();
+
 const { Pool } = require('pg');
 const http = require ('http')
 var bodyParser = require('body-parser');
-var server    = require('http').createServer(app)
-var io = require('socket.io')(server);
+var server = http.createServer(app);
+const io = require('socket.io')(server);
 
-io.on("connection", function(){
-	console.log("connesso")
+
+// WEB SOCKET 
+
+io.on("connection",async(socketEnt) => {
+   
+  socketEnt.on("disconnect", (arg) =>{
+	socketEnt.emit("disconnect")
+	console.log("disconnesso")
+  })
+  console.log("connesso")
+  socketEnt.emit("connesso", "true")
+  await socketEnt.on("sendinsert",async(valore) => {
+	
+	var datiDBP = JSON.parse(valore);
+	console.log({
+		user: datiDBP.USER,
+		host: datiDBP.HOST,
+		database: datiDBP.DB,
+		password: datiDBP.PASS,
+		port: datiDBP.PORT,
+	})
+	const pool = new Pool({
+		user: datiDBP.USER,
+		host: datiDBP.HOST,
+		database: datiDBP.DB,
+		password: datiDBP.PASS,
+		port: datiDBP.PORT,
+	});
+	var campi = '';
+	var valori = '';
+	var pass = 0;
+	var out = '';
+	console.log("eccooooooooooooooooooooooooooo")
+	for (var key in datiDBP) {
+		//var key2 = toString(key)
+
+		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
+			if (pass < 2) {
+				if (pass == 1) {
+					campi = campi + key;
+					valori = valori + "'" + datiDBP[key] + "'";
+				}
+				pass++;
+			} else {
+				campi = campi + ', ' + key;
+				valori = valori + ", '" + datiDBP[key] + "'";
+			}
+		}
+	}
+	console.log(query)
+	var query = 'INSERT INTO ' + datiDBP.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
+	//res.send(query)
+	pool.query(query, async (error) => {
+		if (error) {
+			socketEnt.emit("send-insert-response",error)
+			console.log(error)
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		} else {
+			socketEnt.emit("send-insert-response","ok")
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		}
+	});
+	
+
+	
+	
+  })
 })
-console.log('Server is running ');
-console.log(server)
-console.log(io)
+
+
+
+
+
+
+
+
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
 const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
 app.use(bodyParser.json());
-
-
 
 
 
@@ -46,7 +121,7 @@ var self = this
 
 
 //inizio API ESTERNE
-
+//app.get("/"), 
 app.post("/update/dati/tabella", async(req,res)=> {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -129,10 +204,10 @@ app.post("/update/dati/tabella", async(req,res)=> {
 
 
 
-app.get("/provasocket"), async(req,res)=>
+app.get("/provasocket", async (req, res) =>
 {
 	res.send("ciao")
-}
+})
 app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -804,9 +879,6 @@ app.get('prova', function (req, res) {
 
 /* fine COUCHDB */
 
-app.get('/', function (req, res) {
-	res.send('Sono il root!!!');
-});
 
 app.get('/prima_risorsa_get', function (req, res) {
 	res.send('sono la prima risorsa GET su questo server');
@@ -1211,11 +1283,8 @@ app.get('/pagina_dati', (req,res) => {
 	
 })
 
-
-var server = app.listen(process.env.PORT, function () {
-	var host = server.address().address;
-	var port = server.address().port;
-
-	console.log('Example app listening at http://%s:%s', host, port);
+server.listen(process.env.PORT || 8080, () => {
+    console.log('Application server ')
 });
+
 
