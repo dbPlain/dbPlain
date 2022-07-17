@@ -2,11 +2,28 @@ var request = require('request');
 var express = require('express');
 var app = express();
 const { Pool } = require('pg');
-
+const http = require ('http')
 var bodyParser = require('body-parser');
+var server    = require('http').createServer(app)
+var io = require('socket.io')(server);
+
+io.on("connection", function(){
+	console.log("connesso")
+})
+console.log('Server is running ');
+console.log(server)
+console.log(io)
+
+
 app.use(bodyParser.urlencoded({ extended: false }));
 const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
 app.use(bodyParser.json());
+
+
+
+
+
+
 
 var googleOAuth = require('./googleOAuth');
 const compression = require('compression');
@@ -17,7 +34,18 @@ app.use(compression());
 //const persona = couchdb.db.use("persona")
 const utente = couchdb.db.use('utente');
 
+var self = this
 
+
+
+//WEBSOCKET
+
+
+
+
+
+
+//inizio API ESTERNE
 
 app.post("/update/dati/tabella", async(req,res)=> {
 	var dati = JSON.stringify(req.body);
@@ -98,7 +126,13 @@ app.post("/update/dati/tabella", async(req,res)=> {
 })
 
 
-//inizio API ESTERNE
+
+
+
+app.get("/provasocket"), async(req,res)=>
+{
+	res.send("ciao")
+}
 app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -136,7 +170,14 @@ app.post('/seleziona/dati/tabella', async (req, res) => {
 	});
     
 	pool.query('select * from  ' + datiDB.tabella, function (err, res2) {
+		if (err) 
+		{
+			res.send(err)
+			return
+		}
+		else{
 		res.send(res2);
+		}
 	});
 	pool.end(function (err) {
 		console.log(err);
@@ -1178,4 +1219,3 @@ var server = app.listen(process.env.PORT, function () {
 	console.log('Example app listening at http://%s:%s', host, port);
 });
 
-module.exports = server; // for testing

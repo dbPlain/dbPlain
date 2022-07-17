@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+ 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
@@ -51,6 +52,7 @@
           
           
           
+         
           var tabella=""
           var infoDB ={}
           var infoDB2 ={}
@@ -525,6 +527,8 @@ function eliminaRow(id)
 //basandosi sulla connessione al db e la tabella selezionata
 function dropdowntabella(datiDataBase)
 {
+
+
 
 var httpRequest = new XMLHttpRequest()
 httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
@@ -1064,6 +1068,9 @@ for (i = 0; i < dropdown.length; i++) {
 }
 
 </script>
-
+<script src="/socket.io/socket.io.js"> </script>
+<script>
+  var socket = io();
+</script>
 </body>
 </html> 

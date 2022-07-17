@@ -88,6 +88,7 @@ services:
       - "couch-db" 
     ports:
       - "3000"
+      - "3001"
     env_file:
       - .env
     environment:
@@ -115,7 +116,7 @@ services:
       - INSTANCE=node2
     networks:
       - app-network
-
+ 
 networks:
   app-network:
     driver: bridge
