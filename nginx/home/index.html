@@ -272,7 +272,11 @@ body {
       <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
     </a>
     
-    <button type="button" class="btn btn-success" onclick="redirect_tabelle()">tabella</button>
+    <button type="button" class="btn btn-outline-success" onclick="salva_tabella()" style="text-transform:none" id="salva_tabella_gdrive">
+      <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="../assets/img/Logo_Google_Drive.png" />
+      Salva su Drive
+    </button>
+    <button id="mostra_dati_tabella" type="button" class="btn btn-success" onclick="redirect_tabelle()">tabella</button>
 
     <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
     
@@ -347,7 +351,7 @@ body {
 	             
 	              console.log("disconnesso")
               })
-           
+          var   db_selezionato_corrente=""
           var contatore_riga = 0;
           var nome = ""
           var start = true 
@@ -461,7 +465,8 @@ body {
 
 
             $('#inseriscirigabutton').hide()
-
+            $('#salva_tabella_gdrive').hide()
+            $('#mostra_dati_tabella').hide()
             $("#droptabelle").hide()
             $("#popupdierrore").hide()
             var sidenavbar = "si"
@@ -900,7 +905,7 @@ function eliminaRow(id)
 function dropdowntabella(datiDataBase)
 {
 
-
+  db_selezionato_corrente = datiDataBase.DB
 
 var httpRequest = new XMLHttpRequest()
 httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
@@ -922,6 +927,8 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               aCampo.addEventListener("click" , function(){
                 infoDB = infoDB2
                 $('#inseriscirigabutton').show()
+                $('#salva_tabella_gdrive').show()
+                 $('#mostra_dati_tabella').show()
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
 
                 contatore_riga = 0;
@@ -1103,7 +1110,11 @@ function setCookie(cname, cvalue, exdays) {
 
 
 function redirect_tabelle(){
-  window.location.href = '/static/home/tabella.html?tabella='+tabella; //+'&infodb='+JSON.stringify(infoDB)
+  window.location.href = '/static/home/tabella.html?tabella='+tabella+'&db='+db_selezionato_corrente;
+}
+
+function salva_tabella(){
+  window.location.href = '/salva/tabella?tabella='+tabella+'&db='+db_selezionato_corrente
 }
 
     </script>

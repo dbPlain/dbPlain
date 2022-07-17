@@ -1,7 +1,14 @@
+const fs = require('fs');
+var XLSX = require("xlsx");
+var path = require('path');
+
+let googleOAuth = require('./googleOAuth');
+// Serving static files from "public" folder (documentazione api interne)
+
 var request = require('request');
 var express = require('express');
 const app = express();
-
+app.use(express.static(path.join(__dirname, 'public/')));
 const { Pool } = require('pg');
 const http = require ('http')
 var bodyParser = require('body-parser');
@@ -104,23 +111,11 @@ io.on("connection",async(socketEnt) => {
 })
 
 
-
-
-
-
-
-
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
 app.use(bodyParser.json());
 
-
-
-
-
-var googleOAuth = require('./googleOAuth');
+let googleDrive = require('./googleDrive')
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
@@ -133,7 +128,76 @@ var self = this
 
 
 
-//WEBSOCKET
+/*** API ESTERNA Google Drive ***/
+
+app.get('/salva/tabella', function(req,res){
+
+	let listDBUtente = req.cookies.datiUtente.docs[0].listaDB
+	let tabella = req.query.tabella // tabella da salvare
+	let DB_di_tabella = req.query.db // che appartiene a questo database
+
+	let host_corrente=''
+	let user_corrente=''
+	let pass_corrente=''
+	let port_corrente=''
+	listDBUtente.forEach(DBs => {
+		if (DBs.DB == DB_di_tabella){
+			host_corrente = DBs.HOST
+			user_corrente = DBs.USER
+			pass_corrente = DBs.PASS
+			port_corrente = DBs.PORT
+		}
+	})
+
+	// creo il file excel relativo alla tabella, chiedendo le info sulla tabella al db
+	const pool = new Pool({
+		user: user_corrente,
+		host: host_corrente,
+		database: DB_di_tabella,
+		password: pass_corrente,
+		port: port_corrente,
+	});
+	pool.query('select * from  ' + tabella + ' limit 100', function (err, res2) {
+		
+		const worksheet = XLSX.utils.json_to_sheet(res2.rows);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, tabella);
+		XLSX.writeFile(workbook, __dirname + "/"+tabella+".xlsx");
+
+		res.redirect('/salva/tabella/google_drive/?tabella='+tabella)
+	});
+	pool.end(function (err) {
+		console.log(err);
+	});
+
+})
+
+app.get('/salva/tabella/google_drive/', async function(req,res){
+	googleDrive.Google_Drive_RequestCode(req,res);
+})
+
+app.get('/drive/file/callback', async function(req,res){
+	googleDrive.Google_Drive_GetToken(req,res);
+})
+
+app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, async function(req,res){
+	
+	// eliminare il file excel creato all'inizio
+	let path_file = __dirname + '/'+res.locals.nome_tabella+'.xlsx'
+	fs.unlink(path_file, (err) => {
+		if (err) {
+		  console.error(err)
+		  return
+		}
+	})
+
+	// res.redirect('/static/home/') // si bagga spesso la scritta dropdown 'tabelle'
+	// URL verso il nuovo file salvato su Google Drive Cloud:
+	res.redirect( res.locals.red_uri )
+});
+
+/*** FINE API ESTERNA ***/
+
 
 
 
@@ -141,8 +205,43 @@ var self = this
 
 
 //inizio API ESTERNE
-//app.get("/"), 
-app.post("/update/dati/tabella", async(req,res)=> {
+/*** inizio API INTERNE ***/
+
+// https://apidocjs.com/#example-full
+// https://apidocjs.com/example/
+
+
+/**
+ * @api {post} /update/dati/tabella Bho
+ * @apiName Bho
+ * @apiGroup Tabelle
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} TABELLA
+ * @apiBody {String[]} LISTACAMPI
+ * @apiBody {String[]} LISTAVALORI
+ * @apiBody {String[]} LISTACAMPIINSERT Campi da modificare nella Tabella
+ * @apiBody {String[]} LISTAVALORIINSERT Nuovi Valori da modificare nei Campi indicati
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "TABELLA": "studente",
+ *       "LISTACAMPI": ["nome"],
+ *       "LISTAVALORI": ["lollo"],
+ *       "LISTACAMPIINSERT": ["nome"],
+ *       "LISTAVALORIINSERT": ["lorenzo"],     
+ *     }
+ */
+ app.post("/update/dati/tabella", async(req,res)=> {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
 	const pool = new Pool({
@@ -221,13 +320,30 @@ app.post("/update/dati/tabella", async(req,res)=> {
 })
 
 
-
-
-
-app.get("/provasocket", async (req, res) =>
-{
-	res.send("ciao")
-})
+/**
+ * @api {post} /seleziona/dati/tabella/filtri Seleziona Tabella con Filtro
+ * @apiName Restituisce tutte le righe di una Tabella che rispettano una certa condizione
+ * @apiGroup Seleziona
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella che appartiene al Database.
+ * @apiBody {String} where Condizione da imporre nel filtro delle tuple restituite
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",  
+ *       "where": "matricola = '90909900'",
+ *     }
+ */
 app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -252,6 +368,32 @@ where = datiDB.where
 	});
 });
 
+
+/**
+ * @api {post} /seleziona/dati/tabella Seleziona Tabella
+ * @apiName Restituisce tutte le righe di una Tabella
+ * @apiGroup Seleziona
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella che appartiene al Database.
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",    
+ *     }
+ */
+
+// ..........qui potremmo inserire anche un SuccessExample e un ErrrorExample.......
+
 app.post('/seleziona/dati/tabella', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -260,8 +402,7 @@ app.post('/seleziona/dati/tabella', async (req, res) => {
 		host: datiDB.HOST,
 		database: datiDB.DB,
 		password: datiDB.PASS,
-		port: datiDB.PORT,
-
+		port: datiDB.PORT
 	});
     
 	pool.query('select * from  ' + datiDB.tabella, function (err, res2) {
@@ -278,6 +419,34 @@ app.post('/seleziona/dati/tabella', async (req, res) => {
 		console.log(err);
 	});
 });
+
+
+/**
+ * @api {post} /delete/dati/tabella Elimina righe
+ * @apiName Elimina una o più righe di una Tabella
+ * @apiGroup Gestisci
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} TABELLA
+ * @apiBody {String[]} LISTACAMPI
+ * @apiBody {String[]} LISTAVALORI
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "TABELLA": "studente",
+ *       "LISTACAMPI": ["nome"],
+ *       "LISTAVALORI": ["lollo"],     
+ *     }
+ */
 app.post("/delete/dati/tabella", async(req,res)=> {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -329,6 +498,34 @@ app.post("/delete/dati/tabella", async(req,res)=> {
 
 })
 
+
+/**
+ * @api {post} /insert/dati/tabella Inserisce riga
+ * @apiName Inserisci una singola riga di dati nella tabella indicata
+ * @apiGroup Gestisci
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella in cui si vuole inserire i dati. Deve appartenere al Database.
+ * @apiBody {String} colonna1 Dati da mettere nella riga da inserire nella tabella.
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",
+ * 		  "matricola": "1234",
+ * 		  "nome": "lollo",
+ * 		  "cognome": "ciao",
+ * 		  "età": "34",
+ *     }
+ */
 app.post('/insert/dati/tabella', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
@@ -361,29 +558,95 @@ app.post('/insert/dati/tabella', async (req, res) => {
 	}
 	if (campi == '')  res.send("nessun campo inserito")
 	var query = 'INSERT INTO ' + datiDB.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
-
+	
 	pool.query(query, async (error) => {
+		// res.status(200).send('ok')
 		if (error) {
-			res.send(error + datiDB.DB);
+			res.status(400).send(error + datiDB.DB);
 			pool.end(function (err) {
 				console.log(err);
 			});
 			return;
 		} else {
-			res.send('ok');
+			res.status(400).send('ok');
 			pool.end(function (err) {
 				console.log(err);
 			});
 			return;
 		}
+		res.status(200).send('ok')
 	});
+	res.status(200).send('ok')
 });
 
-app.post("/analisi/filtri/tabella")
-{
-	
-}
 
+/**
+ * @api {get} /user/:id Get User information
+ * @apiName Temp
+ * @apiGroup Temp
+ *
+ * @apiParam {Number} id Users unique ID.
+ *
+ * @apiSuccess {String} firstname Firstname of the User.
+ * @apiSuccess {String} lastname  Lastname of the User.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "firstname": "John",
+ *       "lastname": "Doe"
+ *     }
+ *
+ * @apiError UserNotFound The <code>id</code> of the User was not found.
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 404 Not Found
+ *     {
+ *       "error": "UserNotFound"
+ *     }
+ * 
+ * 
+ * 
+ * 
+ * @apiSuccess {Object[]} tasks Task's list
+ * @apiSuccess {Number} tasks.id Task id
+ * @apiSuccess {Boolean} tasks.done Task is done?
+ * @apiSuccess {Date} tasks.created_at Register's date
+ * @apiSuccess {String} firstname Firstname of the User.
+ * 
+ * @apiError UserNotFound The <code>id</code> of the User was not found.
+ * 
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    [{
+ *      "id": 1,
+ *      "title": "Study",
+ *      "done": false
+ *      "updated_at": "2016-02-10T15:46:51.778Z",
+ *      "created_at": "2016-02-10T15:46:51.778Z"
+ *    }]
+ * @apiErrorExample {json} List error
+ *    HTTP/1.1 500 Internal Server Error
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "firstname": "John",
+ *       "lastname": "Doe"
+ *     }
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 404 Not Found
+ *     {
+ *       "error": "UserNotFound"
+ *     }
+ */
+app.post("/analisi/filtri/tabella", function(req,res){
+	let info = req.body
+	if (info) res.status(200).send('ok')
+	else res.status(200).send('oh no')
+})
+
+// per aggiornare la documentazione: ' apidoc -e public -o public/apidoc '
 
 
 
@@ -1303,8 +1566,12 @@ app.get('/pagina_dati', (req,res) => {
 	
 })
 
-server.listen(process.env.PORT || 8080, () => {
+
+  
+server.listen( 8080, () => {
     console.log('Application server ')
 });
+
+module.exports = server
 
 

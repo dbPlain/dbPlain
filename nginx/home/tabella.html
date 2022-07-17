@@ -37,6 +37,9 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
 
+
+      
+
             var socket = io.connect("http://localhost:8080")
             socket.on("connesso", (arg)=>
                {console.log(arg)
@@ -48,17 +51,30 @@
             
         const url = new URL( window.location.href );
         const tabella = url.searchParams.get("tabella");
+        const db_di_tabella = url.searchParams.get("db");
 
-        // const infoDB = url.searchParams.get("infodb");
-        // const datiDataBase = JSON.parse(infoDB);
+        // trovo le credenziali per accedere al db e alla tabella richiesta
         const prova = decodeURIComponent(document.cookie)
         const provasub = prova.substring(prova.indexOf("{"),prova.length)
-        let datiDataBase = {}
+        let datiDataBaseS = {}
         try {
-            datiDataBase = JSON.parse(provasub).docs[0].listaDB[0]
+            datiDataBaseS = JSON.parse(provasub).docs[0].listaDB
         } catch(e) {
             console.log( JSON.stringify(e) );
         }
+        let datiDataBase = {}
+        datiDataBaseS.forEach(dbs => {
+            if (dbs.DB == db_di_tabella){
+                datiDataBase.HOST = dbs.HOST 
+                datiDataBase.USER = dbs.USER 
+                datiDataBase.PASS = dbs.PASS 
+                datiDataBase.PORT = dbs.PORT
+            }
+        })
+
+        // const infoDB = url.searchParams.get("infodb");
+        // const datiDataBase = JSON.parse(infoDB);
+       
 
         /*let httpRequest3 = new XMLHttpRequest()
         httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
@@ -67,18 +83,21 @@
             
            //const response = httpRequest3.response
            let risorsePost = {"HOST" : datiDataBase.HOST, 
-                            "DB" : datiDataBase.DB,
+                            "DB" : db_di_tabella,
                             "USER" : datiDataBase.USER, 
                             "PASS" : datiDataBase.PASS, 
                             "PORT" : datiDataBase.PORT,
                             "tabella": tabella
-                            }       
+                            }     
+           console.log(risorsePost)  
            var R = JSON.stringify(risorsePost)
            socket.emit("select-dati", R)
            socket.on("select-dati-response", (response)=>
                {console.log(response)
+            
             var datiP = JSON.stringify(response)   
             const dati =  JSON.parse(datiP)
+            console.log(dati)
             const lista = dati.rows
 
             let colonna = {};

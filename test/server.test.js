@@ -13,7 +13,65 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Stato Server', () => {
+    // this.timeout(15000)
+    describe('/POST /seleziona/dati/tabella', () => {
+        it('test: POST di una risorsa qualsiasi', (done) => {
 
+            let infodb = {
+                "HOST": "postgres",
+                "PORT": "5432",
+                "PASS": "adminpass",
+                "DB": "prova",
+                "USER": "postgres",
+                "tabella": "genio"
+            }
+            chai.request(server)
+            .post('/seleziona/dati/tabella')
+            .send(infodb)
+            .end((err, res) => {
+                // console.log(err);
+
+                res.should.have.status(200);
+                // res.body.should.be.a('object');
+
+                done();
+            });
+            // infodb.connect(done)
+        }).timeout(20000);
+
+    });
+
+
+    describe('/POST /insert/dati/tabella', () => {
+        it('test: POST di una risorsa qualsiasi', (done) => {
+
+            let infodb = {
+                "PORT": "5432",
+                "PASS": "as",
+                "HOST": "ss",
+                "DB": "prova",
+                "USER": "dd",
+                "tabella": "genio",
+                "matricola": "1234",
+                "nome": "lollo",
+                "cognome": "ww",
+                "età": "d"
+            }
+            chai.request(server)
+            .post('/insert/dati/tabella')
+            .send(infodb)
+            .end((err, res) => {
+                // console.log(err);
+
+                res.should.have.status(200);
+                // res.body.should.be.a('object');
+
+                done();
+            });
+            // infodb.connect(done)
+        }).timeout(20000);
+
+    });
     describe('/GET stato_server', () => {
         it('it should GET state of the current server', (done) => {
             chai.request(server)
