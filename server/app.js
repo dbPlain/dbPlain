@@ -14,8 +14,28 @@ const io = require('socket.io')(server);
 io.on("connection",async(socketEnt) => {
    
   socketEnt.on("disconnect", (arg) =>{
-	socketEnt.emit("disconnect")
+	
 	console.log("disconnesso")
+  })
+  socketEnt.on("select-dati", (arg) =>{
+	console.log(arg)
+	var datiDB = JSON.parse(arg);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+	});
+	
+	pool.query('select * from  ' + datiDB.tabella + ' limit 100', function (err, res2) {
+		if(err) socketEnt.emit(err)
+		socketEnt.emit("select-dati-response",res2)
+	});
+	pool.end(function (err) {
+		console.log(err);
+	});
+	
   })
   console.log("connesso")
   socketEnt.emit("connesso", "true")
@@ -40,7 +60,7 @@ io.on("connection",async(socketEnt) => {
 	var valori = '';
 	var pass = 0;
 	var out = '';
-	console.log("eccooooooooooooooooooooooooooo")
+	
 	for (var key in datiDBP) {
 		//var key2 = toString(key)
 
