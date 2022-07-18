@@ -26,29 +26,36 @@
     <div style="margin-bottom:5px; display: flex; align-items: center; justify-content: center">
         <div style="font-size: 75%;">colonna: </div><div id="titolo" style="margin-left: 5px; font-size:150%;"></div>
     </div>
-    <canvas id="myChart" width="400" height="400"></canvas>
+    <canvas class="chart" id="myChart" width="400" height="400"></canvas>
     <br><hr>
     <div style="margin-bottom:5px; display: flex; align-items: center; justify-content: center">
         <div style="font-size: 75%;">colonna: </div><div id="titolo2" style="margin-left: 5px; font-size:150%;"></div>
     </div>
-    <canvas id="myChart2" width="400" height="400"></canvas>
+    <canvas class="chart" id="myChart2" width="400" height="400"></canvas>
+
+
+
+    <style>
+        .chart{
+            display:flex; 
+            justify-content:center; 
+            padding:25px;
+        }
+    </style>
 
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
 
+        var socket = io.connect("http://localhost:8080")
+        socket.on("connesso", (arg) => {
+            console.log(arg)
+        })
+        socket.on("disconnect", (arg) => {
+            console.log("disconnesso")
+        })
+        
 
-      
-
-            var socket = io.connect("http://localhost:8080")
-            socket.on("connesso", (arg)=>
-               {console.log(arg)
-                })
-            socket.on("disconnect", (arg) =>{
-	             
-	              console.log("disconnesso")
-              })
-            
         const url = new URL( window.location.href );
         const tabella = url.searchParams.get("tabella");
         const db_di_tabella = url.searchParams.get("db");
@@ -72,32 +79,27 @@
             }
         })
 
-        // const infoDB = url.searchParams.get("infodb");
-        // const datiDataBase = JSON.parse(infoDB);
-       
+        // let httpRequest3 = new XMLHttpRequest()
+        // httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
+        // httpRequest3.setRequestHeader("Content-Type", "application/json");
+        // httpRequest3.onload = function(){
+        // const response = httpRequest3.response
 
-        /*let httpRequest3 = new XMLHttpRequest()
-        httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
-        httpRequest3.setRequestHeader("Content-Type", "application/json");
-        httpRequest3.onload = function(){*/
-            
-           //const response = httpRequest3.response
-           let risorsePost = {"HOST" : datiDataBase.HOST, 
+        let risorsePost = { "HOST" : datiDataBase.HOST, 
                             "DB" : db_di_tabella,
                             "USER" : datiDataBase.USER, 
                             "PASS" : datiDataBase.PASS, 
                             "PORT" : datiDataBase.PORT,
                             "tabella": tabella
-                            }     
-           console.log(risorsePost)  
-           var R = JSON.stringify(risorsePost)
-           socket.emit("select-dati", R)
-           socket.on("select-dati-response", (response)=>
-               {console.log(response)
-            
+                          }
+ 
+        var R = JSON.stringify(risorsePost)
+        socket.emit("select-dati", R)
+        socket.on("select-dati-response", (response) => {
+            console.log("risposta dal server a tabella.html:" + response)
+        
             var datiP = JSON.stringify(response)   
             const dati =  JSON.parse(datiP)
-            console.log(dati)
             const lista = dati.rows
 
             let colonna = {};
@@ -221,8 +223,7 @@
             });
 
         })
-       
-       // httpRequest3.send(JSON.stringify(risorsePost))
+        // httpRequest3.send(JSON.stringify(risorsePost))
 
         function random_rgba() {
             let o = Math.round, r = Math.random, s = 255;

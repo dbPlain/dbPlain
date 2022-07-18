@@ -1,154 +1,149 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
- 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/static/assets/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
-    <meta name="msapplication-TileColor" content="#00a300">
-    <meta name="theme-color" content="#60b56d">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    
-   
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="/socket.io/socket.io.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>dbPlain</title>
 
-<style>
-
-#close-btn{
-  float: right;
-}
-
-#close-btn2{
-  float: right;
-}
-
-body {
-  font-family: "Lato", sans-serif;
-}
-
-/* Fixed sidenav, full height */
-.sidenav {
-  height: 100%;
-  width: 200px;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  padding-top: 20px;
-}
-
-/* Style the sidenav links and the dropdown button */
-.sidenav a, .dropdown-btn {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  border: none;
-  background: none;
-  width: 200px;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
-}
-
-/* On mouse-over */
-.sidenav a:hover, .dropdown-btn:hover {
-  color: #f1f1f1;
-}
-/* Main content */
-.main2 {
-  margin-left: 190px; /* Same as the width of the sidenav */
-  font-size: 20px; /* Increased text to enable scrolling */
-  padding: 0px 10px;
-}
-.main {
- margin-top: 10px;
-  margin-left: 200px; /* Same as the width of the sidenav */
-  font-size: 20px; /* Increased text to enable scrolling */
-  padding: 0px 10px;
-}
-
-/* Add an active class to the active dropdown button */
-.active {
-  background-color: green;
-  color: white;
-}
-
-/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
-.dropdown-container {
-  display: none;
-  background-color: #262626;
-  padding-left: 8px;
-}
-
-/* Optional: Style the caret down icon */
-.fa-caret-down {
-  float: center;
-  padding-right: 8px;
-}
-
-
-/* Some media queries for responsiveness */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-
-@media screen and (max-width: 576px) {
-  .sidenav a, .dropdown-btn{
-    font-size: 15px;
-  }
-  .sidenav{
-    width: 150px;
-  }
-  #dati2 {
-    margin-left: 150px;
-  }
-  #div-iniziale {
-    margin-left: 150px;
-  }
-
-  #show-popup-btn, #logout-sidebar {
-    margin-left: 16% !important;
-    width: 100px !important;
-    font-size: 15px;
-  }
-}
-
-.invisible {
-  display: none;
-}
-
-#show-popup-btn {
-  width:110px; margin-left: 22%; margin-bottom: 20px;
-}
-#logout-sidebar {
-  width: 110px;margin-left: 22%;margin-bottom: 20px; margin-top:10px;
-}
-
-.modal-backdrop {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-</style>
-</head>
-<body>
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/static/assets/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
+	<meta name="msapplication-TileColor" content="#00a300">
+	<meta name="theme-color" content="#60b56d">
   
+  <style>
+    #close-btn{
+      float: right;
+    }
+
+    #close-btn2{
+      float: right;
+    }
+
+    body {
+      font-family: "Lato", sans-serif;
+    }
+
+    /* Fixed sidenav, full height */
+    .sidenav {
+      height: 100%;
+      width: 200px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      padding-top: 20px;
+    }
+
+    /* Style the sidenav links and the dropdown button */
+    .sidenav a, .dropdown-btn {
+      padding: 6px 8px 6px 16px;
+      text-decoration: none;
+      font-size: 25px;
+      color: #818181;
+      display: block;
+      border: none;
+      background: none;
+      width: 200px;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* On mouse-over */
+    .sidenav a:hover, .dropdown-btn:hover {
+      color: #f1f1f1;
+    }
+    /* Main content */
+    .main2 {
+      margin-left: 190px; /* Same as the width of the sidenav */
+      font-size: 20px; /* Increased text to enable scrolling */
+      padding: 0px 10px;
+    }
+    .main {
+    margin-top: 10px;
+      margin-left: 200px; /* Same as the width of the sidenav */
+      font-size: 20px; /* Increased text to enable scrolling */
+      padding: 0px 10px;
+    }
+
+    /* Add an active class to the active dropdown button */
+    .active {
+      background-color: green;
+      color: white;
+    }
+
+    /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+    .dropdown-container {
+      display: none;
+      background-color: #262626;
+      padding-left: 8px;
+    }
+
+    /* Optional: Style the caret down icon */
+    .fa-caret-down {
+      float: center;
+      padding-right: 8px;
+    }
+
+
+    /* Some media queries for responsiveness */
+    @media screen and (max-height: 450px) {
+      .sidenav {padding-top: 15px;}
+      .sidenav a {font-size: 18px;}
+    }
+
+    @media screen and (max-width: 576px) {
+      .sidenav a, .dropdown-btn{
+        font-size: 15px;
+      }
+      .sidenav{
+        width: 150px;
+      }
+      #dati2 {
+        margin-left: 150px;
+      }
+      #div-iniziale {
+        margin-left: 150px;
+      }
+
+      #show-popup-btn, #logout-sidebar {
+        margin-left: 16% !important;
+        width: 100px !important;
+        font-size: 15px;
+      }
+    }
+
+    .invisible {
+      display: none;
+    }
+
+    #show-popup-btn {
+      width:110px; margin-left: 22%; margin-bottom: 20px;
+    }
+    #logout-sidebar {
+      width: 110px;margin-left: 22%;margin-bottom: 20px; margin-top:10px;
+    }
+
+    .modal-backdrop {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+</head>
+
+
+<body>
 
   <div class="modal fade" id="popup-container" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -185,12 +180,7 @@ body {
               <input type="text" name="portdDB" class="form-control" id="portDB"
                   placeholder="inserisci " required />
             </div>
-            
-            
-            
-            
-            
-                
+
            
             <button onclick="Connessionedb(document.getElementById('hostDB').value,
                                            document.getElementById('nomeDB').value,
@@ -211,9 +201,6 @@ body {
   </div>
 
 
-
-
-
   <div class="modal fade" id="inserisci-riga" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -224,8 +211,6 @@ body {
         <div class="modal-body">
 
           <div  class="container-fluid" id = "popup-container2">
-
-            
 
           </div>
 
@@ -273,7 +258,7 @@ body {
     </a>
     
     <button type="button" class="btn btn-outline-success" onclick="salva_tabella()" style="text-transform:none" id="salva_tabella_gdrive">
-      <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="../assets/img/Logo_Google_Drive.png" />
+      <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="GDrive" src="../assets/img/Logo_Google_Drive.png" />
       Salva su Drive
     </button>
     <button id="mostra_dati_tabella" type="button" class="btn btn-success" onclick="redirect_tabelle()">tabella</button>
@@ -284,7 +269,6 @@ body {
 
 
   <div class="main" id='div-iniziale'>
-
     
     <div class="d-flex justify-content-center" >
 
@@ -310,9 +294,7 @@ body {
           </div>
         </div>
       </div>
-    </div>
-      
-   
+    </div> 
     
   </div>
 
@@ -329,52 +311,54 @@ body {
     </table>
   
 </div>  
-  
+
+
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     
-    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src ="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-   <script type="text/javascript"> 
-      
+<script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src ="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 
+
+<script type="text/javascript"> 
 
          
         //variabile globali file  home
        
         var socket = io.connect("http://localhost:8080")
-            socket.on("connesso", (arg)=>
-               {console.log(arg)
-                })
-            socket.on("disconnect", (arg) =>{
-	             
-	              console.log("disconnesso")
-              })
-          var   db_selezionato_corrente=""
-          var contatore_riga = 0;
-          var nome = ""
-          var start = true 
-          let prova = decodeURIComponent(document.cookie)
-          var provasub = prova.substring(prova.indexOf("{"),prova.length)
-          try {
-            datiUtente = JSON.parse(provasub).docs[0]
-            nome = datiUtente.username
-            
-          } catch(e) {
-            datiUtente = {};
-            
-            console.log( JSON.stringify(e) );
-          }
+        socket.on("connesso", (arg) => {
+          console.log(arg)
+        })
+        socket.on("disconnect", (arg) => {
+            console.log("disconnesso")
+        })
+
+
+        
+        var db_selezionato_corrente=""
+        var contatore_riga = 0;
+        var nome = ""
+        var start = true 
+        let prova = decodeURIComponent(document.cookie)
+        var provasub = prova.substring(prova.indexOf("{"),prova.length)
+        try {
+          datiUtente = JSON.parse(provasub).docs[0]
+          nome = datiUtente.username
+        } catch(e) {
+          datiUtente = {};
+          console.log( JSON.stringify(e) );
+        }
          
           
-         if(datiUtente.listaDB != undefined){
-          datiUtente.listaDB.forEach( datidbcookie =>{
-           
-            
+        if(datiUtente.listaDB != undefined){
+          datiUtente.listaDB.forEach( datidbcookie => {
             Connessionedb(datidbcookie.HOST, datidbcookie.DB , datidbcookie.USER , datidbcookie.PASS, datidbcookie.PORT)
-    
-        })}
+          })
+        }
           
           
           
@@ -1117,15 +1101,14 @@ function salva_tabella(){
   window.location.href = '/salva/tabella?tabella='+tabella+'&db='+db_selezionato_corrente
 }
 
-    </script>
-   
-<script>
+
+
+
 
 var dropdown = document.getElementsByClassName("dropdown-btn");
 var i;
 
 //gestione dropdown database
-
 for (i = 0; i < dropdown.length; i++) {
   dropdown[i].addEventListener("click", function() {
  
@@ -1142,13 +1125,6 @@ for (i = 0; i < dropdown.length; i++) {
 }
 
 </script>
-
-
-
-
-
-
-
 
 
 </body>
