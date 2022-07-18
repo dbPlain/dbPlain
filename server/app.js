@@ -38,11 +38,11 @@ app.use(express.static(path.join(__dirname, 'public/')));
 io.on("connection",async(socketEnt) => {
    
   socketEnt.on("disconnect", (arg) =>{
-	console.log("disconnesso")
+	console.log("Server disconnesso")
   })
 
   socketEnt.on("select-dati", (arg) =>{
-	console.log(arg)
+	// console.log(arg)
 	var datiDB = JSON.parse(arg);
 	const pool = new Pool({
 		user: datiDB.USER,
@@ -57,7 +57,7 @@ io.on("connection",async(socketEnt) => {
 		socketEnt.emit("select-dati-response",res2)
 	});
 	pool.end(function (err) {
-		console.log(err);
+		console.log('errore: ' + err);
 	});
 	
   })
@@ -101,21 +101,21 @@ io.on("connection",async(socketEnt) => {
 			}
 		}
 	}
-	console.log(query)
+	// console.log(query)
 	var query = 'INSERT INTO ' + datiDBP.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
 	//res.send(query)
 	pool.query(query, async (error) => {
 		if (error) {
 			socketEnt.emit("send-insert-response",error)
-			console.log(error)
+			console.log('errore: '+error)
 			pool.end(function (err) {
-				console.log(err);
+				console.log('errore: '+err);
 			});
 			return;
 		} else {
 			socketEnt.emit("send-insert-response","ok")
 			pool.end(function (err) {
-				console.log(err);
+				console.log('errore: '+err);
 			});
 			return;
 		}
@@ -167,7 +167,7 @@ app.get('/salva/tabella', function(req,res){
 		res.redirect('/salva/tabella/google_drive/?tabella='+tabella)
 	});
 	pool.end(function (err) {
-		console.log(err);
+		console.log('errore: '+err);
 	});
 
 })
@@ -209,11 +209,10 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
 // https://apidocjs.com/#example-full
 // https://apidocjs.com/example/
 
-
 /**
- * @api {post} /update/dati/tabella Bho
- * @apiName Bho
- * @apiGroup Tabelle
+ * @api {post} /update/dati/tabella Aggiorna Tabella
+ * @apiName Aggiorna uno o più valori di una tabella
+ * @apiGroup Gestisci
  * 
  * @apiBody {String} USER 
  * @apiBody {String} HOST 
@@ -262,7 +261,7 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
 
 	if( listaValoriInsert== undefined || listaValoriInsert == null || listaValoriInsert.length==0 ){
 		pool.end(function (err) {
-			console.log(err);
+			console.log('errore: '+err);
 		});
 		
 		res.send("errore")
@@ -284,7 +283,7 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
 	
 	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
 		pool.end(function (err) {
-			console.log(err);
+			console.log('errore: '+err);
 		});
 		
 		res.send("errore")
@@ -304,13 +303,13 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
 		if (error) {
 			res.send(error);
 			pool.end(function (err) {
-				console.log(err);
+				console.log('errore: '+err);
 				return;
 			});
 		} else {
 			res.send('ok');
 			pool.end(function (err) {
-				console.log(err);
+				console.log('errore: '+err);
 				return;
 			});
 		}
@@ -343,7 +342,7 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
  *       "where": "matricola = '90909900'",
  *     }
  */
-app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
+app.get('/seleziona/dati/tabella/filtri', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
 	const pool = new Pool({
@@ -352,24 +351,22 @@ app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
 		database: datiDB.DB,
 		password: datiDB.PASS,
 		port: datiDB.PORT,
-
 	});
-where = datiDB.where
+	where = datiDB.where
 	
     
 	pool.query('select * from  ' + datiDB.tabella + ' where'+ where, function (err, res2) {
 		if (err) res.send(err)
-		res.send(res2);
-
+		res.send('ok ecco: ' + res2);
 	});
 	pool.end(function (err) {
-		console.log(err);
+		console.log('ehmmmm'+ err);
 	});
 });
 
 
 /**
- * @api {post} /seleziona/dati/tabella Seleziona Tabella
+ * @api {get} /seleziona/dati/tabella Seleziona Tabella
  * @apiName Restituisce tutte le righe di una Tabella
  * @apiGroup Seleziona
  * 
@@ -389,13 +386,33 @@ where = datiDB.where
  *       "PORT": "5432",
  *       "tabella": "studente",    
  *     }
+ * 
+ * @apiSuccess {String} command SELECT
+ * @apiSuccess {int} rowCount Numero di righe della tabella richiesta
+ * @apiSuccess {json[]} rows righe della tabella richiesta
+ * 
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    [{
+ *      "command": "SELECT",
+ *      "rowCount": 12,
+ *      "rows": [
+ * 			{
+ * 				...
+ * 			}
+ * 				]
+ * 		..
+ *    }]
  */
-
-// ..........qui potremmo inserire anche un SuccessExample e un ErrrorExample.......
-
-app.post('/seleziona/dati/tabella', async (req, res) => {
+app.get('/seleziona/dati/tabella', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
+
+	if (!datiDB.USER || !datiDB.HOST || !datiDB.DB || !datiDB.PASS || !datiDB.PORT || !datiDB.tabella){
+		res.status(400).send({msg: 'valori mancanti nella richiesta'})
+		return
+	}
+
 	const pool = new Pool({
 		user: datiDB.USER,
 		host: datiDB.HOST,
@@ -403,19 +420,20 @@ app.post('/seleziona/dati/tabella', async (req, res) => {
 		password: datiDB.PASS,
 		port: datiDB.PORT
 	});
-    
+
 	pool.query('select * from  ' + datiDB.tabella, function (err, res2) {
-		if (err) 
-		{
-			res.send(err)
+		if (err) {
+			console.error('Errore durante l\'esecuzione della query: \n' + err.stack)
+			res.status(404).send('Errore durante l\'esecuzione della query: ' + err)
 			return
 		}
-		else{
-		res.send(res2);
+		else {
+			res.status(200).send(res2);
 		}
 	});
 	pool.end(function (err) {
-		console.log(err);
+		if (err) 
+			res.status(400).send('errore nella chiusura di comunicazione con il database: '+err)
 	});
 });
 
@@ -464,7 +482,7 @@ app.post("/delete/dati/tabella", async(req,res)=> {
 	var t = 0
 	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
 		pool.end(function (err) {
-			console.log(err);
+			console.log('errore: '+err);
 		});
 		
 		res.send("errore")
@@ -557,13 +575,13 @@ app.post('/insert/dati/tabella', async (req, res) => {
 	}
 	if (campi == '')  res.send("nessun campo inserito")
 	var query = 'INSERT INTO ' + datiDB.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
-	
+
 	pool.query(query, async (error) => {
-		// res.status(200).send('ok')
 		if (error) {
-			res.status(400).send(error + datiDB.DB);
+			// console.log(error.stack)
+			res.send(error + datiDB.DB);
 			pool.end(function (err) {
-				console.log(err);
+				// console.log(err);
 			});
 			return;
 		} else {
@@ -573,79 +591,13 @@ app.post('/insert/dati/tabella', async (req, res) => {
 			});
 			return;
 		}
-		res.status(200).send('ok')
 	});
-	res.status(200).send('ok')
+
 });
 
-
-/**
- * @api {get} /user/:id Get User information
- * @apiName Temp
- * @apiGroup Temp
- *
- * @apiParam {Number} id Users unique ID.
- *
- * @apiSuccess {String} firstname Firstname of the User.
- * @apiSuccess {String} lastname  Lastname of the User.
- *
- * @apiSuccessExample Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "firstname": "John",
- *       "lastname": "Doe"
- *     }
- *
- * @apiError UserNotFound The <code>id</code> of the User was not found.
- *
- * @apiErrorExample Error-Response:
- *     HTTP/1.1 404 Not Found
- *     {
- *       "error": "UserNotFound"
- *     }
- * 
- * 
- * 
- * 
- * @apiSuccess {Object[]} tasks Task's list
- * @apiSuccess {Number} tasks.id Task id
- * @apiSuccess {Boolean} tasks.done Task is done?
- * @apiSuccess {Date} tasks.created_at Register's date
- * @apiSuccess {String} firstname Firstname of the User.
- * 
- * @apiError UserNotFound The <code>id</code> of the User was not found.
- * 
- * @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
- *    [{
- *      "id": 1,
- *      "title": "Study",
- *      "done": false
- *      "updated_at": "2016-02-10T15:46:51.778Z",
- *      "created_at": "2016-02-10T15:46:51.778Z"
- *    }]
- * @apiErrorExample {json} List error
- *    HTTP/1.1 500 Internal Server Error
- * 
- * @apiSuccessExample Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "firstname": "John",
- *       "lastname": "Doe"
- *     }
- * @apiErrorExample Error-Response:
- *     HTTP/1.1 404 Not Found
- *     {
- *       "error": "UserNotFound"
- *     }
- */
-app.post("/analisi/filtri/tabella", function(req,res){
-	let info = req.body
-	if (info) res.status(200).send('ok')
-	else res.status(200).send('oh no')
-})
-
 // per aggiornare la documentazione: ' apidoc -i server/ -e server/public/ -o server/public/apidoc/ '
+
+
 
 
 
@@ -703,7 +655,10 @@ app.post('/registrazione', async (req, res) => {
 });
 
 
-/*** GOOGLE LOGIN ***/
+
+/**
+ * GOOGLE LOGIN
+ */
 
 app.get( '/users/auth/google_oauth2',
 	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
@@ -760,7 +715,7 @@ app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, async
 });
 
 
-/*
+/* breve spiegazione
 da: per esempio dall'index.html tramite una form) href (nè get nè post.. in teoria get, al massimo..)
 .. incoming call per /users/auth/google_oauth2 ---reindirizza---> google_requestCode: richiede a google l'auth code dell'utente
 google_requestCode:ricevuto ---reindirizza---> /users/auth/google_oauth2/callback ---reindirizza---> Google_GetToken: richiede a google l'access token (per lo "scope" originario)
@@ -775,16 +730,10 @@ SCHEMA: https://developers.google.com/identity/protocols/oauth2
 ora da app.js posso usaree il token per il mio obiettivo
 */
 
-/*** fine GOOGLE LOGIN ***/
+/**
+ * fine GOOGLE LOGIN
+ */
 
-
-
-
-
-// app.post('/updatecookie', async (req, res) => {
-// 	res.cookie('datiUtente', { errore: false });
-// 	res.redirect('/static/login/');
-// });
 
 app.post('/autenticazione', async (req, res) => {
 	var prova3 = JSON.stringify(req.body);
@@ -816,6 +765,9 @@ app.post('/autenticazione', async (req, res) => {
 		}
 	});
 });
+
+
+
 
 
 
@@ -953,6 +905,8 @@ app.get('/eliminadb', function (req, res) {
 		}
 	});
 });
+
+
 
 
 
@@ -1247,8 +1201,10 @@ app.get('/', (req,res) => {
 })
 
 
-server.listen(process.env.PORT || 8080, () => {
-    console.log('Application server ')
+server.listen(process.env.PORT || 8081, () => {
+	// let host = server.address().address;
+	// let port = server.address().port;
+    console.log('Application (dbPlain) server listening') // at http://%s:%s', host, port
 });
 
 module.exports = server // for testing

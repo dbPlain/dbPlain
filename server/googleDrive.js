@@ -15,7 +15,6 @@ let nome_tabella = ""
 
 let client_id = process.env.GOOGLE_CLIENT_ID
 let client_secret = process.env.GOOGLE_CLIENT_SECRET
-console.log(client_id)
 
 let authorizeURL = "https://accounts.google.com/o/oauth2/v2/auth"
 let scope = "https://www.googleapis.com/auth/drive.file"

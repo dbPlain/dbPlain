@@ -49,7 +49,7 @@
 
         var socket = io.connect("http://localhost:8080")
         socket.on("connesso", (arg) => {
-            console.log(arg)
+            console.log('connesso: ' + arg)
         })
         socket.on("disconnect", (arg) => {
             console.log("disconnesso")
@@ -67,7 +67,7 @@
         try {
             datiDataBaseS = JSON.parse(provasub).docs[0].listaDB
         } catch(e) {
-            console.log( JSON.stringify(e) );
+            console.log('errore: '+ JSON.stringify(e) );
         }
         let datiDataBase = {}
         datiDataBaseS.forEach(dbs => {

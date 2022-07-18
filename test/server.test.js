@@ -13,38 +13,32 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Stato Server', () => {
-    // this.timeout(15000)
-    describe('/POST /seleziona/dati/tabella', () => {
-        it('test: POST di una risorsa qualsiasi', (done) => {
 
+    describe('/GET selezionare una tabella senza dare abbastanza informazioni', () => {
+        it('GET ricevere messaggio: valori mancanti nella richiesta ', (done) => {
             let infodb = {
-                "HOST": "postgres",
-                "PORT": "5432",
-                "PASS": "adminpass",
-                "DB": "prova",
                 "USER": "postgres",
-                "tabella": "genio"
+                "HOST": "postgres",
+                "DB": "prova",
+                "PASS": "adminpass",
+                // "PORT": "5432",
+                // "tabella": "genio"
             }
             chai.request(server)
-            .post('/seleziona/dati/tabella')
+            .get('/seleziona/dati/tabella')
             .send(infodb)
             .end((err, res) => {
-                // console.log(err);
-
-                res.should.have.status(200);
-                // res.body.should.be.a('object');
-
+                res.should.have.status(400);
+                res.body.should.be.a('object');
+                res.body.should.have.property('msg');
+                res.body.msg.should.be.equal('valori mancanti nella richiesta');
                 done();
             });
-            // infodb.connect(done)
-        }).timeout(20000);
-
+        })
     });
 
-
-    describe('/POST /insert/dati/tabella', () => {
-        it('test: POST di una risorsa qualsiasi', (done) => {
-
+    describe('/POST Inserisci dati nella tabella', () => {
+        it('POST di una tupla in una tabella indicata dall\'utente', (done) => {
             let infodb = {
                 "PORT": "5432",
                 "PASS": "as",
@@ -55,25 +49,20 @@ describe('Stato Server', () => {
                 "matricola": "1234",
                 "nome": "lollo",
                 "cognome": "ww",
-                "età": "d"
+                "età": "55"
             }
             chai.request(server)
             .post('/insert/dati/tabella')
             .send(infodb)
             .end((err, res) => {
-                // console.log(err);
-
                 res.should.have.status(200);
-                // res.body.should.be.a('object');
-
                 done();
             });
-            // infodb.connect(done)
-        }).timeout(20000);
-
+        })
     });
+
     describe('/GET stato_server', () => {
-        it('it should GET state of the current server', (done) => {
+        it('it should GET the state of the current server', (done) => {
             chai.request(server)
             .get('/stato_server')
             .end((err, res) => {
@@ -84,25 +73,5 @@ describe('Stato Server', () => {
             });
         });
     });
-
-    describe('/POST risorsa', () => {
-        it('test: POST di una risorsa qualsiasi', (done) => {
-            let utente = {
-                user: "user1",
-                birth: 2000
-            }
-            chai.request(server)
-            .post('/prima_risorsa_post')
-            .send(utente)
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('object');
-                //
-                done();
-            });
-        });
-  
-    });
-  
 
 });

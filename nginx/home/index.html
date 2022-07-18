@@ -331,7 +331,7 @@
        
         var socket = io.connect("http://localhost:8080")
         socket.on("connesso", (arg) => {
-          console.log(arg)
+            console.log('connesso: ' + arg)
         })
         socket.on("disconnect", (arg) => {
             console.log("disconnesso")
@@ -350,7 +350,7 @@
           nome = datiUtente.username
         } catch(e) {
           datiUtente = {};
-          console.log( JSON.stringify(e) );
+          console.log('errore:'+ JSON.stringify(e) );
         }
          
           
@@ -569,11 +569,11 @@
 
             
              var jsonO = JSON.parse(json)
-             console.log(json)
+            //  console.log(json)
 
              socket.emit("sendinsert", json)
              socket.on("send-insert-response" ,(response) => {
-              console.log(response)
+              console.log('risposta dal server a home db: ' + response)
               if(response == "ok")
               {
                
