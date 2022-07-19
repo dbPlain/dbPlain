@@ -12,7 +12,7 @@ $(function () {
 		datiUtente = JSON.parse(provasub).docs[0];
 	} catch (e) {
 		datiUtente = null;
-		console.log(JSON.stringify(e));
+		console.log('errore: ' + JSON.stringify(e));
 	}
 	if (datiUtente) {
 		// è loggato, allora..
@@ -113,3 +113,5 @@ function setCookie(cname, cvalue, exdays) {
 	let expires = 'expires=' + d.toUTCString();
 	document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
 }
+
+

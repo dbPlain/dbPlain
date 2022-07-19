@@ -1,56 +1,370 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.2/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <title>dbPlain</title>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/static/assets/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
+	<meta name="msapplication-TileColor" content="#00a300">
+	<meta name="theme-color" content="#60b56d">
+  
+  <style>
+    #close-btn{
+      float: right;
+    }
+
+    #close-btn2{
+      float: right;
+    }
+
+    body {
+      font-family: "Lato", sans-serif;
+    }
+
+    /* Fixed sidenav, full height */
+    .sidenav {
+      height: 100%;
+      width: 200px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      padding-top: 20px;
+    }
+
+    /* Style the sidenav links and the dropdown button */
+    .sidenav a, .dropdown-btn {
+      padding: 6px 8px 6px 16px;
+      text-decoration: none;
+      font-size: 25px;
+      color: #818181;
+      display: block;
+      border: none;
+      background: none;
+      width: 200px;
+      text-align: left;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* On mouse-over */
+    .sidenav a:hover, .dropdown-btn:hover {
+      color: #f1f1f1;
+    }
+    /* Main content */
+    .main2 {
+      margin-left: 190px; /* Same as the width of the sidenav */
+      font-size: 20px; /* Increased text to enable scrolling */
+      padding: 0px 10px;
+    }
+    .main {
+    margin-top: 10px;
+      margin-left: 200px; /* Same as the width of the sidenav */
+      font-size: 20px; /* Increased text to enable scrolling */
+      padding: 0px 10px;
+    }
+
+    /* Add an active class to the active dropdown button */
+    .active {
+      background-color: green;
+      color: white;
+    }
+
+    /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+    .dropdown-container {
+      display: none;
+      background-color: #262626;
+      padding-left: 8px;
+    }
+
+    /* Optional: Style the caret down icon */
+    .fa-caret-down {
+      float: center;
+      padding-right: 8px;
+    }
+
+
+    /* Some media queries for responsiveness */
+    @media screen and (max-height: 450px) {
+      .sidenav {padding-top: 15px;}
+      .sidenav a {font-size: 18px;}
+    }
+
+    @media screen and (max-width: 576px) {
+      .sidenav a, .dropdown-btn{
+        font-size: 15px;
+      }
+      .sidenav{
+        width: 150px;
+      }
+      #dati2 {
+        margin-left: 150px;
+      }
+      #div-iniziale {
+        margin-left: 150px;
+      }
+
+      #show-popup-btn, #logout-sidebar {
+        margin-left: 16% !important;
+        width: 100px !important;
+        font-size: 15px;
+      }
+    }
+
+    .invisible {
+      display: none;
+    }
+
+    #show-popup-btn {
+      width:110px; margin-left: 22%; margin-bottom: 20px;
+    }
+    #logout-sidebar {
+      width: 110px;margin-left: 22%;margin-bottom: 20px; margin-top:10px;
+    }
+
+    .modal-backdrop {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <div class="modal fade" id="popup-container" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Aggiungi un database</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <form action="javascript:void(0);">
+            <div class="mb-3">
+              <span>HOST:</span>
+              <input type="text" name="hostDB" class="form-control"  id="hostDB"
+                  placeholder="Inserisci l'host del tuo db" required autofocus />
+            </div>
+            <div class="mb-3">
+              <span>NOME DB:</span>
+              <input type="text" name="nomeDB" class="form-control" id="nomeDB"
+                  placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>USER:</span>
+              <input type="text" name="userDB" class="form-control" id="userDB"
+                  placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>PASSWORD:</span>
+              <input type="password" name="passwordDB" class="form-control" id="passwordDB"
+                placeholder="inserisci password" required />
+            </div>
+            <div class="mb-3">
+              <span>PORT:</span>
+              <input type="text" name="portdDB" class="form-control" id="portDB"
+                  placeholder="inserisci " required />
+            </div>
+
+           
+            <button onclick="Connessionedb(document.getElementById('hostDB').value,
+                                           document.getElementById('nomeDB').value,
+                                           document.getElementById('userDB').value,
+                                           document.getElementById('passwordDB').value,
+                                           document.getElementById('portDB').value)" 
+                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" id="conneti-db-btn" type="button">Connetti db</button>
+            
     
-    <script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src ="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-   
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/static/assets/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/static/assets/favicon/safari-pinned-tab.svg" color="#60b56d">
-    <meta name="msapplication-TileColor" content="#00a300">
-    <meta name="theme-color" content="#60b56d">
+            <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
+            <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
+            <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="margin-top: 40px; margin-left: 15%;">Close</button> -->
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="inserisci-riga" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Aggiungi una riga</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <div  class="container-fluid" id = "popup-container2">
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="popup-container">
+
+ 
+</div>
+
+<div  id="sidenav"class="sidenav">
+  
+  <br><br>
+  <button type="button" class="btn btn-danger" id="logout-sidebar" onclick="logout()">
+    <i class="fa fa-sign-out" aria-hidden="true"></i> Logout
+  </button>
+
+  <button href="" class="btn btn-success" type="button" id="show-popup-btn"
+    data-bs-toggle="modal" data-bs-target="#popup-container" data-bs-toggle="modal">aggiungi database</button>
+
+  <button id="dropdowndb-btn" class="dropdown-btn">database 
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-container" id="dropdown2"></div>
+  <button id="droptabelle" class="dropdown-btn">Tabelle 
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-container" id="dropdown">
     
-   <script type="text/javascript"> 
-      
-     
+  </div>
+  
+</div>
+
+<nav id="navbarprova"   style="width:100% !important;" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container-fluid">
+    <button id="hamburger"   class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/static/" style="margin-right: 0em;">
+      <!-- dbPlain -->
+      <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
+    </a>
+    
+    <button type="button" class="btn btn-outline-success" onclick="salva_tabella()" style="text-transform:none" id="salva_tabella_gdrive">
+      <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="GDrive" src="../assets/img/Logo_Google_Drive.png" />
+      Salva su Drive
+    </button>
+    <button id="mostra_dati_tabella" type="button" class="btn btn-success" onclick="redirect_tabelle()">tabella</button>
+
+    <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
+    
+  </nav>
+
+
+  <div class="main" id='div-iniziale'>
+    
+    <div class="d-flex justify-content-center" >
+
+      <div class="d-flex justify-content-around flex-column"style="width: 30rem !important;max-width: 100% !important;">
+        <div class="card" style=" background-color:#E7F7CC;max-width: 100% !important;">
+          <div class="card-body" >
+            <h5 class="card-title" > <strong id="titolo">Ciao!</strong> </h5>
+            <br>
+            
+            <p class="card-text"> In questa pagina puoi visualizzare e lavorare su tutti i tuoi database in modo semplice e veloce</p>
+            
+            <button type="button"  id="pop-trigger"class="btn btn-outline-success">Aggiugni un db ora!</button>
+           
+          </div>
+        </div>
+
+        <div class="card" style="background-color:#E7F7CC;max-width: 100% !important;" >
+          <div class="card-body">
+            <h5 class="card-title"><strong>Gestisci tutte le tue tabelle</strong></h5>
+            <br>
+            <p class="card-text">Una volta aggiunto e selezionato un database avrai la possibilià di gestire tutte le tabelle al suo interno</p>
+
+          </div>
+        </div>
+      </div>
+    </div> 
+    
+  </div>
+
+<div id="dati2" class="main" style="display:none">
+
+    <table     id="tabella" class="table table-bordered">
+      <thead id="head">
+        <tr id = "testa">
+        </tr>
+      </thead>
+      <tbody id="body">
+         
+      </tbody>
+    </table>
+  
+</div>  
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
+<script src ="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src ="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+
+<script type="text/javascript"> 
+
+         
         //variabile globali file  home
-    
-          var contatore_riga = 0;
-          var nome = ""
-          var start = true 
-          let prova = decodeURIComponent(document.cookie)
-          var provasub = prova.substring(prova.indexOf("{"),prova.length)
-          try {
-            datiUtente = JSON.parse(provasub).docs[0]
-            nome = datiUtente.username
-            
-          } catch(e) {
-            datiUtente = {};
-            
-            console.log( JSON.stringify(e) );
-          }
+       
+        var socket = io.connect("https://localhost:8083",{
+          withCredentials: true,
+        })
+        socket.on("connesso", (arg) => {
+            console.log('connesso: ' + arg)
+        })
+        socket.on("disconnect", (arg) => {
+            console.log("disconnesso")
+        })
+
+
+        
+        var db_selezionato_corrente=""
+        var contatore_riga = 0;
+        var nome = ""
+        var start = true 
+        let prova = decodeURIComponent(document.cookie)
+        var provasub = prova.substring(prova.indexOf("{"),prova.length)
+        try {
+          datiUtente = JSON.parse(provasub).docs[0]
+          nome = datiUtente.username
+        } catch(e) {
+          datiUtente = {};
+          console.log('errore:'+ JSON.stringify(e) );
+        }
          
           
-         if(datiUtente.listaDB != undefined){
-          datiUtente.listaDB.forEach( datidbcookie =>{
-           
-            
+        if(datiUtente.listaDB != undefined){
+          datiUtente.listaDB.forEach( datidbcookie => {
             Connessionedb(datidbcookie.HOST, datidbcookie.DB , datidbcookie.USER , datidbcookie.PASS, datidbcookie.PORT)
-    
-        })}
+          })
+        }
           
           
           
+         
           var tabella=""
           var infoDB ={}
           var infoDB2 ={}
@@ -137,7 +451,8 @@
 
 
             $('#inseriscirigabutton').hide()
-
+            $('#salva_tabella_gdrive').hide()
+            $('#mostra_dati_tabella').hide()
             $("#droptabelle").hide()
             $("#popupdierrore").hide()
             var sidenavbar = "si"
@@ -219,7 +534,7 @@
         
         }
           var richiestaDelete = new XMLHttpRequest()
-             richiestaDelete.open("post", "http://localhost:8080/deleteriga" , true)
+             richiestaDelete.open("post", "https://localhost:8083/deleteriga" , true)
              richiestaDelete.setRequestHeader("Content-Type", "application/json");
              richiestaDelete.onload = function()
              {
@@ -256,7 +571,57 @@
 
             
              var jsonO = JSON.parse(json)
-             var richiestaInsert = new XMLHttpRequest()
+            //  console.log(json)
+
+             socket.emit("sendinsert", json)
+             socket.on("send-insert-response" ,(response) => {
+              console.log('risposta dal server a home db: ' + response)
+              if(response == "ok")
+              {
+               
+                  
+                closeriga()
+                if(tabella == jsonO.tabella)
+                    { var tbody = document.getElementById("body")
+                      var lista= []
+                      var   tr2 = document.createElement("tr")
+                     
+                      var th = document.createElement("th")
+                      th.innerHTML=" <span onclick='eliminaRow("+-1+")' style='color:red' class='bi bi-trash'></span>"
+                    
+                      if ((contatore_riga-1)%2 == 0 ) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                      else th.setAttribute('style', 'font-weight:normal')
+                      tr2.appendChild(th)
+                      for  (var  key in jsonO){
+                        if(key != "HOST" && key != "DB" && key != "PORT" && key != "PASS" && key != "USER"){
+                        
+        
+                        th = document.createElement("th")
+                        th.innerHTML=jsonO[key]
+                        if ((contatore_riga-1)%2 == 0) th.setAttribute('style', 'font-weight:normal; background-color: #E7F7CC;')
+                        else th.setAttribute('style', 'font-weight:normal')
+                        lista.push(th)
+                        
+                        }                       
+                      }                      
+                      for (var i = 1; i <lista.length; i++)
+                      {                                            
+                        tr2.appendChild(lista[i])
+                      }
+                      tbody.appendChild(tr2)
+
+                    }
+                else{                 
+                 }
+              }
+              else 
+              {
+                console.log("errore, ricontrolla il formato dei dati inseriti" +response)
+                $("#errorpop2").show()
+              }
+
+             })
+             /*var richiestaInsert = new XMLHttpRequest()
              richiestaInsert.open("post", "http://localhost:8080/insertriga" , true)
              richiestaInsert.setRequestHeader("Content-Type", "application/json");
              richiestaInsert.onload = function(){
@@ -306,7 +671,7 @@
                 $("#errorpop2").show()
               }
              }
-              richiestaInsert.send(JSON.stringify(jsonO))
+              richiestaInsert.send(JSON.stringify(jsonO))*/
            }
            
 
@@ -446,7 +811,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
           
           var richiesta =  new XMLHttpRequest()
         
-          richiesta.open("post", "http://localhost:8080/connessionedb" , true)
+          richiesta.open("post", "https://localhost:8083/connessionedb" , true)
           richiesta.setRequestHeader("Content-Type", "application/json");
           richiesta.onload = function(nomeDB){
            var response = richiesta.response  
@@ -457,7 +822,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
                  if(!start){
                    
                    var richiestaSalvataggioDB =  new XMLHttpRequest()
-                   richiestaSalvataggioDB.open("post", "http://localhost:8080/updatedbutente" , true)
+                   richiestaSalvataggioDB.open("post", "https://localhost:8083/updatedbutente" , true)
                    richiestaSalvataggioDB.setRequestHeader("Content-Type", "application/json");
                    richiestaSalvataggioDB.onload = function(nomeDB){  
                     
@@ -526,8 +891,10 @@ function eliminaRow(id)
 function dropdowntabella(datiDataBase)
 {
 
+  db_selezionato_corrente = datiDataBase.DB
+
 var httpRequest = new XMLHttpRequest()
-httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
+httpRequest.open("post", "https://localhost:8083/tabelledb" , true)
 httpRequest.setRequestHeader("Content-Type", "application/json");
          httpRequest.onload = function(){
             var response = httpRequest.response
@@ -546,6 +913,8 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
               aCampo.addEventListener("click" , function(){
                 infoDB = infoDB2
                 $('#inseriscirigabutton').show()
+                $('#salva_tabella_gdrive').show()
+                 $('#mostra_dati_tabella').show()
                 if($("#popupdierrore") != null) $("#popupdierrore").hide()
 
                 contatore_riga = 0;
@@ -576,7 +945,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
 
      
                 var httpRequest3 = new XMLHttpRequest()
-                httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
+                httpRequest3.open("post", "https://localhost:8083/selezionaDatiTabelladinamico" , true)
                 httpRequest3.setRequestHeader("Content-Type", "application/json");
                 httpRequest3.onload = function(){
                     
@@ -724,322 +1093,24 @@ function setCookie(cname, cvalue, exdays) {
 	let expires = "expires="+ d.toUTCString();
 	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
-    </script>
-   
 
-    
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<style>
-
-#close-btn{
-  float: right;
+function redirect_tabelle(){
+  window.location.href = '/static/home/tabella.html?tabella='+tabella+'&db='+db_selezionato_corrente;
 }
 
-#close-btn2{
-  float: right;
-}
-
-body {
-  font-family: "Lato", sans-serif;
-}
-
-/* Fixed sidenav, full height */
-.sidenav {
-  height: 100%;
-  width: 200px;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  padding-top: 20px;
-}
-
-/* Style the sidenav links and the dropdown button */
-.sidenav a, .dropdown-btn {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-  border: none;
-  background: none;
-  width: 200px;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
-}
-
-/* On mouse-over */
-.sidenav a:hover, .dropdown-btn:hover {
-  color: #f1f1f1;
-}
-/* Main content */
-.main2 {
-  margin-left: 190px; /* Same as the width of the sidenav */
-  font-size: 20px; /* Increased text to enable scrolling */
-  padding: 0px 10px;
-}
-.main {
- margin-top: 10px;
-  margin-left: 200px; /* Same as the width of the sidenav */
-  font-size: 20px; /* Increased text to enable scrolling */
-  padding: 0px 10px;
-}
-
-/* Add an active class to the active dropdown button */
-.active {
-  background-color: green;
-  color: white;
-}
-
-/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
-.dropdown-container {
-  display: none;
-  background-color: #262626;
-  padding-left: 8px;
-}
-
-/* Optional: Style the caret down icon */
-.fa-caret-down {
-  float: center;
-  padding-right: 8px;
+function salva_tabella(){
+  window.location.href = '/salva/tabella?tabella='+tabella+'&db='+db_selezionato_corrente
 }
 
 
-/* Some media queries for responsiveness */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-
-@media screen and (max-width: 576px) {
-  .sidenav a, .dropdown-btn{
-    font-size: 15px;
-  }
-  .sidenav{
-    width: 150px;
-  }
-  #dati2 {
-    margin-left: 150px;
-  }
-  #div-iniziale {
-    margin-left: 150px;
-  }
-
-  #show-popup-btn, #logout-sidebar {
-    margin-left: 16% !important;
-    width: 100px !important;
-    font-size: 15px;
-  }
-}
-
-.invisible {
-  display: none;
-}
-
-#show-popup-btn {
-  width:110px; margin-left: 22%; margin-bottom: 20px;
-}
-#logout-sidebar {
-  width: 110px;margin-left: 22%;margin-bottom: 20px; margin-top:10px;
-}
-
-.modal-backdrop {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-</style>
-</head>
-<body>
-  
-
-  <div class="modal fade" id="popup-container" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Aggiungi un database</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-
-          <form action="javascript:void(0);">
-            <div class="mb-3">
-              <span>HOST:</span>
-              <input type="text" name="hostDB" class="form-control"  id="hostDB"
-                  placeholder="Inserisci l'host del tuo db" required autofocus />
-            </div>
-            <div class="mb-3">
-              <span>NOME DB:</span>
-              <input type="text" name="nomeDB" class="form-control" id="nomeDB"
-                  placeholder="inserisci password" required />
-            </div>
-            <div class="mb-3">
-              <span>USER:</span>
-              <input type="text" name="userDB" class="form-control" id="userDB"
-                  placeholder="inserisci password" required />
-            </div>
-            <div class="mb-3">
-              <span>PASSWORD:</span>
-              <input type="password" name="passwordDB" class="form-control" id="passwordDB"
-                placeholder="inserisci password" required />
-            </div>
-            <div class="mb-3">
-              <span>PORT:</span>
-              <input type="text" name="portdDB" class="form-control" id="portDB"
-                  placeholder="inserisci " required />
-            </div>
-            
-            
-            
-            
-            
-                
-           
-            <button onclick="Connessionedb(document.getElementById('hostDB').value,
-                                           document.getElementById('nomeDB').value,
-                                           document.getElementById('userDB').value,
-                                           document.getElementById('passwordDB').value,
-                                           document.getElementById('portDB').value)" 
-                                           style="position: relative; margin-top:40px;margin-left: 38%;" class="btn btn-danger" id="conneti-db-btn" type="button">Connetti db</button>
-            
-    
-            <div style="margin-top: 10px;" class="alert alert-danger" id="errorpop"> errore inserimento dati </div>
-            <div style="margin-top: 10px;" class="alert alert-danger" id="existpop"> errore, db già inserito </div>
-            <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="margin-top: 40px; margin-left: 15%;">Close</button> -->
-          </form>
-
-        </div>
-      </div>
-    </div>
-  </div>
 
 
-
-
-
-  <div class="modal fade" id="inserisci-riga" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Aggiungi una riga</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-
-          <div  class="container-fluid" id = "popup-container2">
-
-            
-
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-<div id="popup-container">
-
- 
-</div>
-
-<div  id="sidenav"class="sidenav">
-  
-  <br><br>
-  <button type="button" class="btn btn-danger" id="logout-sidebar" onclick="logout()">
-    <i class="fa fa-sign-out" aria-hidden="true"></i> Logout
-  </button>
-
-  <button href="" class="btn btn-success" type="button" id="show-popup-btn"
-    data-bs-toggle="modal" data-bs-target="#popup-container" data-bs-toggle="modal">aggiungi database</button>
-
-  <button id="dropdowndb-btn" class="dropdown-btn">database 
-    <i class="fa fa-caret-down"></i>
-  </button>
-  <div class="dropdown-container" id="dropdown2"></div>
-  <button id="droptabelle" class="dropdown-btn">Tabelle 
-    <i class="fa fa-caret-down"></i>
-  </button>
-  <div class="dropdown-container" id="dropdown">
-    
-  </div>
-  
-</div>
-
-<nav id="navbarprova"   style="width:100% !important;" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-  <div class="container-fluid">
-    <button id="hamburger"   class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand" href="/static/" style="margin-right: 0em;">
-      <!-- dbPlain -->
-      <img src="../assets/img/logo+nome_dbplain_negativo.png" alt="" style="max-width:100%;height:30px;margin-bottom:2px;">
-    </a>
-    
-    <button onclick="insertriga()" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inserisci-riga" id="inseriscirigabutton">inserisci nuova riga</button>
-    
-  </nav>
-
-
-  <div class="main" id='div-iniziale'>
-
-    
-    <div class="d-flex justify-content-center" >
-
-      <div class="d-flex justify-content-around flex-column"style="width: 30rem !important;max-width: 100% !important;">
-        <div class="card" style=" background-color:#E7F7CC;max-width: 100% !important;">
-          <div class="card-body" >
-            <h5 class="card-title" > <strong id="titolo">Ciao!</strong> </h5>
-            <br>
-            
-            <p class="card-text"> In questa pagina puoi visualizzare e lavorare su tutti i tuoi database in modo semplice e veloce</p>
-            
-            <button type="button"  id="pop-trigger"class="btn btn-outline-success">Aggiugni un db ora!</button>
-           
-          </div>
-        </div>
-
-        <div class="card" style="background-color:#E7F7CC;max-width: 100% !important;" >
-          <div class="card-body">
-            <h5 class="card-title"><strong>Gestisci tutte le tue tabelle</strong></h5>
-            <br>
-            <p class="card-text">Una volta aggiunto e selezionato un database avrai la possibilià di gestire tutte le tabelle al suo interno</p>
-
-          </div>
-        </div>
-      </div>
-    </div>
-      
-   
-    
-  </div>
-
-<div id="dati2" class="main" style="display:none">
-
-    <table     id="tabella" class="table table-bordered">
-      <thead id="head">
-        <tr id = "testa">
-        </tr>
-      </thead>
-      <tbody id="body">
-         
-      </tbody>
-    </table>
-  
-</div>  
-  
-
-<script>
 
 var dropdown = document.getElementsByClassName("dropdown-btn");
 var i;
 
 //gestione dropdown database
-
 for (i = 0; i < dropdown.length; i++) {
   dropdown[i].addEventListener("click", function() {
  
@@ -1056,6 +1127,7 @@ for (i = 0; i < dropdown.length; i++) {
 }
 
 </script>
+
 
 </body>
 </html> 

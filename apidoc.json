@@ -1,0 +1,10 @@
+{
+    "name": "dbPlain API documentation",
+    "version": "1.0.0",
+    "description": "API per interagire con il database",
+    "template": {
+        "withCompare": false
+    },
+    "url" : "https://localhost:8083",
+    "sampleUrl" : "https://localhost:8083"
+}

@@ -21,12 +21,12 @@ var authorizeURL_Login = 'https://accounts.google.com/o/oauth2/v2/auth';
 var tokenURL_Login = 'https://www.googleapis.com/oauth2/v4/token';
 var scope_login = 'openid profile email'; //or "https://www.googleapis.com/auth/userinfo.profile";
 
-var red_uri = 'http://localhost:8080/users/auth/google_oauth2/callback'; // http://0598a596738b99.lhrtunnel.link/users/auth/google_oauth2/callback
+var red_uri = 'https://localhost:8083/users/auth/google_oauth2/callback'; // http://0598a596738b99.lhrtunnel.link/users/auth/google_oauth2/callback
 
 async function Google_RequestCode(req, res, next) {
 	let _nonce = crypto.randomBytes(127).toString('base64url'); // https://stackoverflow.com/questions/53548858/is-there-a-difference-in-security-between-a-random-string-encoded-as-base64-vs-h
 	var nonce_hash = await saveCookie(res, _nonce);
-
+console.log('aooooooooooooooooooooooooo')
 	var getCode = authorizeURL_Login.concat(
 		'?client_id=' + client_id,
 		'&scope=' + scope_login,
@@ -35,12 +35,12 @@ async function Google_RequestCode(req, res, next) {
 		'&approval_prompt=force&response_type=code'
 	);
 
-	if (req.cookies.googleLogin === undefined || req.cookies.googleLogin.expire_time < Date.now()) {
+	// if (req.cookies.googleLogin === undefined || req.cookies.googleLogin.expire_time < Date.now()) {
 		res.redirect(getCode);
-	}
+	// }
 	// ha già effettuato con successo il OAuth.
 	// next() manda alla funzione di callback successiva a chi ha chiamato questa funzione (/users/auth/google_oauth2)
-	else next();
+	// else next();
 }
 
 async function Google_GetToken(req, res, next) {

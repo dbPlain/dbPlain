@@ -1,41 +1,497 @@
 var request = require('request');
 var express = require('express');
-var app = express();
+const app = express();
 const { Pool } = require('pg');
+const cors = require('cors');
+app.use(cors())
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
-const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
 app.use(bodyParser.json());
 
-var googleOAuth = require('./googleOAuth');
+const fs = require('fs');
+var XLSX = require("xlsx");
+var path = require('path');
+
+let googleOAuth = require('./googleOAuth');
+let googleDrive = require('./googleDrive')
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 app.use(compression());
 
-//const persona = couchdb.db.use("persona")
+const couchdb = require('nano')('http://admin:admin@' + process.env.COUCHDB_URL + '');
 const utente = couchdb.db.use('utente');
 
-app.post("/deleteriga", async(req,res)=> {
-	var prova = JSON.stringify(req.body);
-	var prova2 = JSON.parse(prova);
+const http = require ('http')
+var server = http.createServer(app);
+const io = require('socket.io')(server, {
+	cors: {
+		origin: "https://localhost:8083",
+		methods: ["GET", "POST"],
+		allowedHeaders: ["my-custom-header"],
+		credentials: true
+	  }	
+});
+
+// Serving static files from "public" folder (documentazione api interne, '/apidoc')
+app.use(express.static(path.join(__dirname, 'public/')));
+
+
+
+
+/********************************************/
+/*				  WEB SOCKET	 		    */
+/********************************************/
+
+io.on("connection",async(socketEnt) => {
+   
+  socketEnt.on("disconnect", (arg) =>{
+	console.log("Server disconnesso")
+  })
+
+  socketEnt.on("select-dati", (arg) =>{
+	// console.log(arg)
+	var datiDB = JSON.parse(arg);
 	const pool = new Pool({
-		user: prova2.USER,
-		host: prova2.HOST,
-		database: prova2.DB,
-		password: prova2.PASS,
-		port: prova2.PORT,
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+	});
+	
+	pool.query('select * from  ' + datiDB.tabella + ' limit 100', function (err, res2) {
+		if(err) socketEnt.emit(err)
+		socketEnt.emit("select-dati-response",res2)
+	});
+	pool.end(function (err) {
+		console.log('errore: ' + err);
+	});
+	
+  })
+  console.log("connesso")
+  socketEnt.emit("connesso", "true")
+  await socketEnt.on("sendinsert",async(valore) => {
+	
+	var datiDBP = JSON.parse(valore);
+	console.log({
+		user: datiDBP.USER,
+		host: datiDBP.HOST,
+		database: datiDBP.DB,
+		password: datiDBP.PASS,
+		port: datiDBP.PORT,
+	})
+	const pool = new Pool({
+		user: datiDBP.USER,
+		host: datiDBP.HOST,
+		database: datiDBP.DB,
+		password: datiDBP.PASS,
+		port: datiDBP.PORT,
+	});
+	var campi = '';
+	var valori = '';
+	var pass = 0;
+	var out = '';
+	
+	for (var key in datiDBP) {
+		//var key2 = toString(key)
+
+		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
+			if (pass < 2) {
+				if (pass == 1) {
+					campi = campi + key;
+					valori = valori + "'" + datiDBP[key] + "'";
+				}
+				pass++;
+			} else {
+				campi = campi + ', ' + key;
+				valori = valori + ", '" + datiDBP[key] + "'";
+			}
+		}
+	}
+	// console.log(query)
+	var query = 'INSERT INTO ' + datiDBP.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
+	//res.send(query)
+	pool.query(query, async (error) => {
+		if (error) {
+			socketEnt.emit("send-insert-response",error)
+			console.log('errore: '+error)
+			pool.end(function (err) {
+				console.log('errore: '+err);
+			});
+			return;
+		} else {
+			socketEnt.emit("send-insert-response","ok")
+			pool.end(function (err) {
+				console.log('errore: '+err);
+			});
+			return;
+		}
+	});
+	
+  })
+})
+
+
+
+/********************************************/
+/*		API esterna: Google Drive	 	    */
+/********************************************/
+
+app.get('/salva/tabella', function(req,res){
+
+	let listDBUtente = req.cookies.datiUtente.docs[0].listaDB
+	let tabella = req.query.tabella // tabella da salvare
+	let DB_di_tabella = req.query.db // che appartiene a questo database
+
+	let host_corrente=''
+	let user_corrente=''
+	let pass_corrente=''
+	let port_corrente=''
+	listDBUtente.forEach(DBs => {
+		if (DBs.DB == DB_di_tabella){
+			host_corrente = DBs.HOST
+			user_corrente = DBs.USER
+			pass_corrente = DBs.PASS
+			port_corrente = DBs.PORT
+		}
+	})
+
+	// creo il file excel relativo alla tabella, chiedendo le info sulla tabella al db
+	const pool = new Pool({
+		user: user_corrente,
+		host: host_corrente,
+		database: DB_di_tabella,
+		password: pass_corrente,
+		port: port_corrente,
+	});
+	pool.query('select * from  ' + tabella + ' limit 100', function (err, res2) {
+		
+		const worksheet = XLSX.utils.json_to_sheet(res2.rows);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, tabella);
+		XLSX.writeFile(workbook, __dirname + "/"+tabella+".xlsx");
+
+		res.redirect('/salva/tabella/google_drive/?tabella='+tabella)
+	});
+	pool.end(function (err) {
+		console.log('errore: '+err);
+	});
+
+})
+
+app.get('/salva/tabella/google_drive/', async function(req,res){
+	googleDrive.Google_Drive_RequestCode(req,res);
+})
+
+app.get('/drive/file/callback', async function(req,res){
+	googleDrive.Google_Drive_GetToken(req,res);
+})
+
+app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, async function(req,res){
+	
+	// eliminare il file excel creato all'inizio
+	let path_file = __dirname + '/'+res.locals.nome_tabella+'.xlsx'
+	fs.unlink(path_file, (err) => {
+		if (err) {
+		  console.error(err)
+		  return
+		}
+	})
+
+	res.redirect('/static/home/') // si bagga spesso la scritta dropdown 'tabelle'
+	// URL verso il nuovo file salvato su Google Drive Cloud:
+	// res.redirect( res.locals.red_uri )
+});
+
+
+
+
+
+
+
+/********************************************/
+/*				  API INTERNE	 		    */
+/********************************************/
+
+// https://apidocjs.com/#example-full
+// https://apidocjs.com/example/
+
+/**
+ * @api {post} /update/dati/tabella Aggiorna Tabella
+ * @apiName Aggiorna uno o più valori di una tabella
+ * @apiGroup Gestisci
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} TABELLA
+ * @apiBody {String[]} LISTACAMPI
+ * @apiBody {String[]} LISTAVALORI
+ * @apiBody {String[]} LISTACAMPIINSERT Campi da modificare nella Tabella
+ * @apiBody {String[]} LISTAVALORIINSERT Nuovi Valori da modificare nei Campi indicati
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "TABELLA": "studente",
+ *       "LISTACAMPI": ["nome"],
+ *       "LISTAVALORI": ["lollo"],
+ *       "LISTACAMPIINSERT": ["nome"],
+ *       "LISTAVALORIINSERT": ["lorenzo"],     
+ *     }
+ */
+ app.post("/update/dati/tabella", async(req,res)=> {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+
+	});
+    
+	var listaCampi= datiDB.LISTACAMPI
+	var listaValori= datiDB.LISTAVALORI
+	var listaCampiInsert= datiDB.LISTACAMPIINSERT
+	var listaValoriInsert= datiDB.LISTAVALORIINSERT
+     
+
+
+
+	if( listaValoriInsert== undefined || listaValoriInsert == null || listaValoriInsert.length==0 ){
+		pool.end(function (err) {
+			console.log('errore: '+err);
+		});
+		
+		res.send("errore")
+	    return 
+} 
+
+
+	var t = 0
+	var setString = ""
+	listaCampiInsert.forEach(element => {
+		setString =  setString + element + " = '" + listaValoriInsert[t] + "'    ,"
+		t++
+	
+	})
+	t=0
+	setString = setString.substring(0,setString.length-4)
+	var query = "update " +  datiDB.TABELLA + " set " + setString+ " where "
+	
+	
+	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
+		pool.end(function (err) {
+			console.log('errore: '+err);
+		});
+		
+		res.send("errore")
+	    return 
+} 
+	else
+	{listaCampi.forEach(element => {
+		query = query + element + " = '" + listaValori[t] + "' and "
+		t++
+	
+	})};
+
+	query = query.substring(0,query.length-4)
+	
+	
+	pool.query(query, (error, results, fields) => {
+		if (error) {
+			res.send(error);
+			pool.end(function (err) {
+				console.log('errore: '+err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log('errore: '+err);
+				return;
+			});
+		}
+	});
+
+})
+
+
+/**
+ * @api {post} /seleziona/dati/tabella/filtri Seleziona Tabella con Filtro
+ * @apiName Restituisce tutte le righe di una Tabella che rispettano una certa condizione
+ * @apiGroup Seleziona
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella che appartiene al Database.
+ * @apiBody {String} where Condizione da imporre nel filtro delle tuple restituite
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",  
+ *       "where": "matricola = '90909900'",
+ *     }
+ */
+app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+	});
+	where = datiDB.where
+	
+    
+	pool.query('select * from  ' + datiDB.tabella + ' where'+ where, function (err, res2) {
+		if (err) res.send(query)
+		res.send(res2);
+	});
+	pool.end(function (err) {
+		console.log('ehmmmm'+ err);
+	});
+});
+
+
+/**
+ * @api {post} /seleziona/dati/tabella Seleziona Tabella
+ * @apiName Restituisce tutte le righe di una Tabella
+ * @apiGroup Seleziona
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella che appartiene al Database.
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",    
+ *     }
+ * 
+ * @apiSuccess {String} command SELECT
+ * @apiSuccess {int} rowCount Numero di righe della tabella richiesta
+ * @apiSuccess {json[]} rows righe della tabella richiesta
+ * 
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    [{
+ *      "command": "SELECT",
+ *      "rowCount": 12,
+ *      "rows": [
+ * 			{
+ * 				...
+ * 			}
+ * 				]
+ * 		..
+ *    }]
+ */
+app.post('/seleziona/dati/tabella', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+
+	if (!datiDB.USER || !datiDB.HOST || !datiDB.DB || !datiDB.PASS || !datiDB.PORT || !datiDB.tabella){
+		res.status(400).send({msg: 'valori mancanti nella richiesta'})
+		return
+	}
+
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT
+	});
+
+	pool.query('select * from  ' + datiDB.tabella, function (err, res2) {
+		if (err) {
+			console.error('Errore durante l\'esecuzione della query: \n' + err.stack)
+			res.status(404).send('Errore durante l\'esecuzione della query: ' + err)
+			return
+		}
+		else {
+			res.status(200).send(res2);
+		}
+	});
+	pool.end(function (err) {
+		if (err) 
+			res.status(400).send('errore nella chiusura di comunicazione con il database: '+err)
+	});
+});
+
+
+/**
+ * @api {post} /delete/dati/tabella Elimina righe
+ * @apiName Elimina una o più righe di una Tabella
+ * @apiGroup Gestisci
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} TABELLA
+ * @apiBody {String[]} LISTACAMPI
+ * @apiBody {String[]} LISTAVALORI
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "TABELLA": "studente",
+ *       "LISTACAMPI": ["nome"],
+ *       "LISTAVALORI": ["lollo"],     
+ *     }
+ */
+app.post("/delete/dati/tabella", async(req,res)=> {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
 
 	});
 
-	var listaCampi= prova2.LISTACAMPI
-	var listaValori= prova2.LISTAVALORI
-	var query = "delete from " +  prova2.TABELLA + " where "
+	var listaCampi= datiDB.LISTACAMPI
+	var listaValori= datiDB.LISTAVALORI
+	var query = "delete from " +  datiDB.TABELLA + " where "
 	var t = 0
 	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
 		pool.end(function (err) {
-			console.log(err);
+			console.log('errore: '+err);
 		});
 		
 		res.send("errore")
@@ -67,6 +523,98 @@ app.post("/deleteriga", async(req,res)=> {
 	});
 
 })
+
+
+/**
+ * @api {post} /insert/dati/tabella Inserisce riga
+ * @apiName Inserisci una singola riga di dati nella tabella indicata
+ * @apiGroup Gestisci
+ * 
+ * @apiBody {String} USER 
+ * @apiBody {String} HOST 
+ * @apiBody {String} DB DB a cui l'utente può accedere.
+ * @apiBody {String} PASS Password per accedere al database.
+ * @apiBody {String} PORT Porta a cui è accessibile il database.
+ * @apiBody {String} tabella Tabella in cui si vuole inserire i dati. Deve appartenere al Database.
+ * @apiBody {String} colonna1 Dati da mettere nella riga da inserire nella tabella.
+ * 
+ * @apiParamExample {json} Request-Example:
+ *     {
+ *       "USER": "postgres",
+ *       "HOST": "postgres",
+ *       "DB": "presentazione",
+ *       "PASS": "adminpass",
+ *       "PORT": "5432",
+ *       "tabella": "studente",
+ * 		  "matricola": "1234",
+ * 		  "nome": "lollo",
+ * 		  "cognome": "ciao",
+ * 		  "età": "34",
+ *     }
+ */
+app.post('/insert/dati/tabella', async (req, res) => {
+	var dati = JSON.stringify(req.body);
+	var datiDB = JSON.parse(dati);
+	const pool = new Pool({
+		user: datiDB.USER,
+		host: datiDB.HOST,
+		database: datiDB.DB,
+		password: datiDB.PASS,
+		port: datiDB.PORT,
+	});
+	var campi = '';
+	var valori = '';
+	var pass = 0;
+	var out = '';
+	for (var key in datiDB) {
+		//var key2 = toString(key)
+
+		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
+			if (pass < 2) {
+				if (pass == 1) {
+					campi = campi + key;
+					valori = valori + "'" + datiDB[key] + "'";
+				}
+				pass++;
+			} else {
+				campi = campi + ', ' + key;
+				valori = valori + ", '" + datiDB[key] + "'";
+			}
+		}
+	}
+	if (campi == '')  res.send("nessun campo inserito")
+	var query = 'INSERT INTO ' + datiDB.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
+
+	pool.query(query, async (error) => {
+		if (error) {
+			// console.log(error.stack)
+			res.send(error + datiDB.DB);
+			pool.end(function (err) {
+				// console.log(err);
+			});
+			return;
+		} else {
+			res.status(200).send('ok');
+			pool.end(function (err) {
+				console.log(err);
+			});
+			return;
+		}
+	});
+
+});
+
+// per aggiornare la documentazione: ' apidoc -i server/ -e server/public/ -o server/public/apidoc/ '
+
+
+
+
+
+
+
+/********************************************/
+/*				  	LOGIN		 		    */
+/********************************************/
 
 //const utentelist =  utente.list()
 app.post('/registrazione', async (req, res) => {
@@ -114,31 +662,87 @@ app.post('/registrazione', async (req, res) => {
 	// res.redirect('/static/home/');
 	return;
 });
-/* var prova3 =  JSON.stringify(req.body) 
-  var dati =  JSON.parse(prova3)
 
-  var query = { selector: { username: dati.username  , password : dati.password } }
 
-    utente.find(query,function (error, body , headers){
-    
-    prova = JSON.stringify(error)
-    prova2 = JSON.parse(prova)
-    if(error) 
-    {
-      res.send(prova + "errore")
-    }
-    else 
-    {  
-      if (body.bookmark == "nil") res.send("<h4>CREDENZIALI ERRATE</h4>") 
-      else{
-        res.redirect("static/home.html")
-      } 
-      
-    }*/
-app.post('/updatecookie', async (req, res) => {
-	res.cookie('datiUtente', { errore: false });
-	res.redirect('/static/login/');
+
+/**
+ * GOOGLE LOGIN
+ */
+
+app.get( '/users/auth/google_oauth2',
+	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
+	function already_Authenticated(req, res) {
+		res.redirect('/static/home/');
+	}
+);
+
+app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, async function Google_Token_Response(req, res) {
+	var data_from_google = req.decoded_body;
+	var info_utente = {
+		// unique_id: data_from_google.sub,
+		email: data_from_google.email,
+		name: data_from_google.name,
+		// propic: data_from_google.picture,
+		expire_time: Date.now() + data_from_google.exp * 1000,
+	};
+
+	let corpo = await couchdb.db.use('utente').list();
+	let corpoString = JSON.stringify(corpo);
+	let dati = JSON.parse(corpoString);
+	var t = corpo.total_rows;
+	t += 1;
+	// res.send(t + ' ' + info_utente.email + ' ' + info_utente.name)
+	var query = { selector: { username: info_utente.name, email: info_utente.email } };
+	utente.find(query, async function (error, body, headers) {
+		// prova = JSON.stringify(error);
+		//let prova2 = JSON.parse(prova)
+		if (error) {
+			res.send(prova + 'errore');
+		} else {
+			if (body.bookmark == 'nil') {
+
+				await utente.insert({
+					_id: t + '',
+					username: info_utente.name,
+					email: info_utente.email,
+					password:''
+				});
+				res.redirect('/static/home/');
+
+			} else {
+				res.cookie('datiUtente', body);
+				res.redirect('/static/home/');
+				return;
+			}
+		}
+	});
+
+	return;
+
+	// res.cookie('googleLogin', info_utente, { httpOnly: true }); // set cookie
+	// res.redirect('/static/home/');
 });
+
+
+/* breve spiegazione
+da: per esempio dall'index.html tramite una form) href (nè get nè post.. in teoria get, al massimo..)
+.. incoming call per /users/auth/google_oauth2 ---reindirizza---> google_requestCode: richiede a google l'auth code dell'utente
+google_requestCode:ricevuto ---reindirizza---> /users/auth/google_oauth2/callback ---reindirizza---> Google_GetToken: richiede a google l'access token (per lo "scope" originario)
+Google_GetToken:ricevuto ---reindirizza---> /orario2
+
+SCHEMA: https://developers.google.com/identity/protocols/oauth2
+
+--> /users/auth/google_oauth2 --> Google_RequestCode --> google
+/users/auth/google_oauth2/callback <-- Google_RequestCode <-- google (autentifica l'utente e manda l'auth code alla web app richiedente)
+/users/auth/google_oauth2/callback --> Google_GetToken --> google 
+/orario2 <-- Google_GetToken <-- google (concede un access token al richiedente)
+ora da app.js posso usaree il token per il mio obiettivo
+*/
+
+/**
+ * fine GOOGLE LOGIN
+ */
+
 
 app.post('/autenticazione', async (req, res) => {
 	var prova3 = JSON.stringify(req.body);
@@ -170,99 +774,16 @@ app.post('/autenticazione', async (req, res) => {
 		}
 	});
 });
-/* AUTENTICAZIONE */
-app.post('/autenticazione2', function (req, res) {
-	//var utility= ""
-	var options = {
-		url: 'http://admin:admin@' + process.env.COUCHDB_URL + '/persona/_find',
 
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-			'Accept-Charset': 'utf-8',
-		},
-		body: {
-			selector: {
-				name: '"Paolo"',
-			},
-			fields: ['sesso'],
-			limit: 2,
-			skip: 0,
-		},
-		timeout: 5000,
-		json: true,
-	};
-	request.post(options, (err, body) => {
-		//var prova =  JSON.stringify(req.body)
-		//var dati =  JSON.parse(prova)
 
-		if (err) {
-			console.log('errore');
-			res.send('non ok ' + err);
-		} else {
-			//var dati2 = JSON.parse(body)
 
-			res.send('ok' + body);
-		}
-	});
-});
 
-/*app.post('/autenticazione', function(req,res){
-  var utility= ""
-  request.get('http://admin:admin@'+ process.env.COUCHDB_URL+"/persona"+"/_all_docs?include_docs=true", function(error,result,body)
-  {
-    var prova =  JSON.stringify(req.body) 
-    dati =  JSON.parse(prova)
-    
-     if(error)
-     {
-       console.log("errore")
-       res.send(error)
-     }
-     else{
-      
-      var dati2 = JSON.parse(body)
-      var strin = ""
-     
-      res.send(dati2.rows[1].doc.name+" " + body + " " + dati.username)
-      
-     }
-  });
 
-   
-  
 
-//  var t = prova.password 
-  //var c = prova.username 
- 
-})*/
-/*
-  if (valutazione=="pessima") {
-    res.send("Ciao " + req.body.username + "!<br> Certo che la tua password <code>"+req.body.password+"</code> è davvero " + valutazione + "!");
-  } else {
-    res.redirect('http://localhost:8080/nginx');
-  }
-  */
 
-/* COUCHDB */
-
-// var  options = {
-//   url: 'http://admin:admin@'+ process.env.COUCHDB_URL+'/utente/10',
-//   method: 'POST',
-//   headers: {
-//      'Content-Type': 'application/json',
-//      'Accept-Charset': 'utf-8'
-
-//    },
-//   body: {
-//          "name": "nome",
-//          "cognome": "cognome",
-//          "eta":21,
-//          "sesso": "no",
-//          "codice-fiscale" : "AAAABBBB"
-//         },
-//   json: true
-// };
+/********************************************/
+/*				 utils COUCHDB	 		    */
+/********************************************/
 
 app.get('/insutente', function (req, res) {
 	var options = {
@@ -394,277 +915,65 @@ app.get('/eliminadb', function (req, res) {
 	});
 });
 
-/* request({
-    url: 'http://admin:admin@'+ process.env.COUCHDB_URL,
-    
-    method: 'GET',
-  
-  }, function(error, response, body){
-    if(error) {
-      console.log(error + "AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
-      res.send(response.statusCode+"AOOOO: http://admin:admin@"+ process.env.COUCHDB_URL);
-    } else {
-      res.send(response.statusCode+" "+body)
-      console.log(response.statusCode, body);
-    }
-  }); */
 
-app.get('prova', function (req, res) {
-	request(
-		{
-			url: 'http://admin:admin@' + process.env.COUCHDB_URL + '/utente/4',
 
-			method: 'POST',
 
-			body: {
-				nome: 'ciao',
-				cognome: 'prova',
-			},
-			content_type: 'application/json',
-		},
-		function (error, response, body) {
-			if (error) {
-				console.log(error + 'AOOOO: http://admin:admin@' + process.env.COUCHDB_URL);
-				res.send(response.statusCode + 'AOOOO: http://admin:admin@' + process.env.COUCHDB_URL);
-			} else {
-				res.send(response.statusCode + ' ' + body);
-				console.log(response.statusCode, body);
-			}
-		}
-	);
-});
 
-/* fine COUCHDB */
 
-app.get('/', function (req, res) {
-	res.send('Sono il root!!!');
-});
+/********************************************/
+/*				   HOME DB		 		    */
+/********************************************/
 
-app.get('/prima_risorsa_get', function (req, res) {
-	res.send('sono la prima risorsa GET su questo server');
-});
-
-app.get('/stessa_risorsa', function (req, res) {
-	res.send('sono la stessa_risorsa acceduta in GET');
-});
-app.post('/stessa_risorsa', function (req, res) {
-	res.send('sono la stessa_risorsa acceduta in POST');
-});
-
-app.get('/seconda_risorsa_get', function (req, res) {
-	res.send('sono la seconda risorsa GET su questo server');
-});
-
-app.get('/stato_server', function (req, res) {
-	res.send('nodo: ' + process.env.NODE_ENV + ' \nistanza: ' + process.env.INSTANCE + ' \nporta: ' + process.env.PORT);
-});
-
-app.post('/prima_risorsa_post', function (req, res) {
-	res.send('sono la prima risorsa POST su questo server');
-});
-
-/* LOGIN (form) */
-
-app.post('/orario', function (req, res) {
-	// per reindirizzare su risorse statiche che il server conosce:
-	//res.redirect('http://localhost:8080/static/index.html');
-
-	// per comunicare con API:
-	/*request({
-    uri: 'http://localhost:8080/static/index.html',
-    method: 'GET'
-  }, function(error, response, body){
-    if (error){
-      console.log(error);
-    } else {
-      res.send(response.statusCode+" "+body);
-      console.log(response.statusCode, body);
-    }
-  })*/
-
-	// per fare operazioni di logica:
-	/*var valutazione = "null";
-  JSON.stringify(req.body.myPassword).length<8 ? valutazione="pessima" : valutazione="ottima";
-  res.send("Ciao " + req.body.myEmail + "!<br> Certo che la tua password <code>"+req.body.myPassword+"</code> è davvero " + valutazione + "!");*/
-	//res.status(301).redirect("https://www.google.com"); //per reindirizzare su un altro URL. ma non è possibile metterlo dopo "res.send"
-	//console.log("POST "+req.body.myEmail+" and "+req.body.myPassword);
-
-	// per fare operazioni di logica e reindirizzare con altre informazioni in più:
-	res.send(JSON.stringify(req.body));
-	let valutazione;
-	JSON.stringify(req.body.password).length < 8 ? (valutazione = 'pessima') : (valutazione = 'ottima');
-	if (valutazione == 'pessima') {
-		res.send(
-			'Ciao ' +
-				req.body.username +
-				'!<br> Certo che la tua password <code>' +
-				req.body.password +
-				'</code> è davvero ' +
-				valutazione +
-				'!'
-		);
-	} else {
-		res.redirect('http://localhost:8080/nginx');
-	}
-});
-
-/* fine LOGIN (form) */
-
-/*** GOOGLE LOGIN ***/
-
-// app.get('/users/auth/google_oauth2', function(req,res){
-//   googleOAuth.Google_RequestCode(req,res)
-// })
-
-// app.get('/users/auth/google_oauth2/callback', function(req,res){
-//   var google_authcode = req.query.code;
-//   googleOAuth.Google_GetToken(req,res, google_authcode);
-// })
-
-app.get(
-	'/users/auth/google_oauth2',
-	googleOAuth.Google_RequestCode, //middleware function, allora ha come parametri "(req,res,next)"
-	function already_Authenticated(req, res) {
-		res.redirect('/static/home/');
-	}
-);
-
-app.get('/users/auth/google_oauth2/callback', googleOAuth.Google_GetToken, function Google_Token_Response(req, res) {
-	var data_from_google = req.decoded_body;
-	var info_utente = {
-		unique_id: data_from_google.sub,
-		email: data_from_google.email,
-		name: data_from_google.name,
-		propic: data_from_google.picture,
-		expire_time: Date.now() + data_from_google.exp * 1000,
-	};
-	res.cookie('googleLogin', info_utente, { httpOnly: true }); // set cookie
-	res.redirect('/static/home/');
-});
-
-app.get('/orario2', function (req, res) {
-	res.send(
-		"Benvenuto/a!<br> <img src='" +
-			req.cookies.googleLogin.propic +
-			"' atl=''/>" +
-			req.cookies.googleLogin.name +
-			'<br><br><br>Questo cookie durerà fino a ' +
-			req.cookies.googleLogin.expire_time +
-			'<br>per sloggarti: <button onclick=\'location.href = "/elimina"\';>log out</button>'
-	);
-});
-
-app.get('/elimina', function (req, res) {
-	res.clearCookie('googleLogin');
-	res.redirect('/');
-	res.end();
-});
-
-/*
-da: per esempio dall'index.html tramite una form) href (nè get nè post.. in teoria get, al massimo..)
-.. incoming call per /users/auth/google_oauth2 ---reindirizza---> google_requestCode: richiede a google l'auth code dell'utente
-google_requestCode:ricevuto ---reindirizza---> /users/auth/google_oauth2/callback ---reindirizza---> Google_GetToken: richiede a google l'access token (per lo "scope" originario)
-Google_GetToken:ricevuto ---reindirizza---> /orario2
-
-SCHEMA: https://developers.google.com/identity/protocols/oauth2
-
---> /users/auth/google_oauth2 --> Google_RequestCode --> google
-/users/auth/google_oauth2/callback <-- Google_RequestCode <-- google (autentifica l'utente e manda l'auth code alla web app richiedente)
-/users/auth/google_oauth2/callback --> Google_GetToken --> google 
-/orario2 <-- Google_GetToken <-- google (concede un access token al richiedente)
-ora da app.js posso usaree il token per il mio obiettivo
-*/
-
-/*** fine GOOGLE LOGIN ***/
-
-// function inserisciQualcosa(db)
-// {
-
-//   var  options = {
-//     url: 'http://admin:admin@'+ process.env.COUCHDB_URL+'/persona/'+req.query.numero,
-//     method: 'PUT',
-//     headers: {
-//        'Content-Type': 'application/json',
-//        'Accept-Charset': 'utf-8'
-
-//      },
-//     body: {
-//            "name": req.query.nome,
-//            "cognome": req.query.cognome,
-//            "eta":parseInt(req.query.eta),
-//            "sesso": req.query.sesso,
-//            "codice-fiscale" : req.query.codf
-//           },
-//     json: true
-//   };
-
-//   request.put(options, (err, body) => {
-
-//     if (err) {
-//       res.send("no " +err)
-//     }
-//     //console.log(`Status: ${res.statusCode}`);
-//     //res.write(response.statusCode.toString());
-//     res.send("ok "+body.toJSON.toString+ req.query.numero)
-//   });
-
-// }
-
-app.get('/prova', function (req, res) {
-	request.get(
-		'http://admin:admin@' + process.env.COUCHDB_URL + '/' + req.query.db + '/_all_docs?include_docs=true',
-		function (error, result, body) {
-			if (error) {
-				res.send('non ok' + error);
-			} else {
-				//var prova = JSON.stringify(body)
-				var dati = JSON.parse(body);
-				//var t = dati.offset
-				res.send(dati.total_rows + '');
-			}
-		}
-	);
-});
-
-app.get('/prova2', async (req, res) => {
-	const pool = new Pool({
-		user: 'postgres',
-		host: 'postgres',
-		database: 'utente',
-		password: 'adminpass',
-		port: '5432',
-	});
-
-	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) res.send(err);
-		else res.send(res2);
-	});
-	pool.end(function (err) {
-		console.log(err);
-	});
-});
-
-app.post('/colonneTabella', async (req, res) => {
-	const pool = new Pool({
-		user: 'postgres',
-		host: 'postgres',
-		database: 'utente',
-		password: 'adminpass',
-		port: '5432',
-	});
-
+app.post("/deleteriga", async(req,res)=> {
 	var prova = JSON.stringify(req.body);
 	var prova2 = JSON.parse(prova);
-	pool.query(
-		"select column_name from information_schema.columns where table_name = '" + prova2.tabella + "'",
-		function (err, res2) {
-			res.send(res2);
-		}
-	);
-	pool.end(function (err) {
-		console.log(err);
+	const pool = new Pool({
+		user: prova2.USER,
+		host: prova2.HOST,
+		database: prova2.DB,
+		password: prova2.PASS,
+		port: prova2.PORT,
+
 	});
-});
+
+	var listaCampi= prova2.LISTACAMPI
+	var listaValori= prova2.LISTAVALORI
+	var query = "delete from " +  prova2.TABELLA + " where "
+	var t = 0
+	if( listaValori== undefined || listaValori == null || listaValori.length==0 ){
+		pool.end(function (err) {
+			console.log(err);
+		});
+		
+		res.send("errore")
+	    return 
+	}
+	else
+	{listaCampi.forEach(element => {
+		query = query + element + " = '" + listaValori[t] + "' and "
+		t++
+	
+	})};
+
+	query = query.substring(0,query.length-4)
+	
+	pool.query(query, (error, results, fields) => {
+		if (error) {
+			res.send(error);
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		} else {
+			res.send('ok');
+			pool.end(function (err) {
+				console.log(err);
+				return;
+			});
+		}
+	});
+
+})
 
 app.post('/selezionaDatiTabella', async (req, res) => {
 	const pool = new Pool({
@@ -687,13 +996,6 @@ app.post('/selezionaDatiTabella', async (req, res) => {
 });
 
 app.post('/connessionedb', async (req, res) => {
-	/*const pool = new Pool({
-        user: "postgres",
-        host: "postgres",
-        database: "utente",
-        password: "adminpass",
-        port: "5432"
-      })*/
 	var prova = JSON.stringify(req.body);
 	var prova2 = JSON.parse(prova);
 
@@ -732,13 +1034,6 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
 		password: prova2.PASS,
 		port: prova2.PORT,
 	});
-	/*const pool = new Pool({
-            user: "postgres",
-            host: "postgres",
-            database: "utente",
-            password: "adminpass",
-            port: "5432"
-          });*/
 
 	pool.query('select * from  ' + prova2.tabella + ' limit 100', function (err, res2) {
 		res.send(res2);
@@ -746,39 +1041,6 @@ app.post('/selezionaDatiTabelladinamico', async (req, res) => {
 	pool.end(function (err) {
 		console.log(err);
 	});
-});
-
-app.post('/tabelledb', async (req, res) => {
-	var prova = JSON.stringify(req.body);
-	var prova2 = JSON.parse(prova);
-	const pool = new Pool({
-		user: prova2.USER,
-		host: prova2.HOST,
-		database: prova2.DB,
-		password: prova2.PASS,
-		port: prova2.PORT,
-	});
-	/*const pool = new Pool({
-              user: "postgres",
-              host: "postgres",
-              database: "utente",
-              password: "adminpass",
-              port: "5432"
-            });*/
-
-	pool.query("select table_name from information_schema.tables where table_schema = 'public'", function (err, res2) {
-		if (err) {
-			res.send(err);
-			pool.end(function (err) {
-				console.log(err);
-			});
-			return;
-		} else res.send(res2);
-	});
-	pool.end(function (err) {
-		console.log(err);
-	});
-	return;
 });
 
 app.post('/tabelledb', async (req, res) => {
@@ -822,7 +1084,6 @@ app.post('/insertriga', async (req, res) => {
 	var pass = 0;
 	var out = '';
 	for (var key in prova2) {
-		//var key2 = toString(key)
 
 		if (key != 'HOST' && key != 'DB' && key != 'PORT' && key != 'PASS' && key != 'USER') {
 			if (pass < 2) {
@@ -838,7 +1099,7 @@ app.post('/insertriga', async (req, res) => {
 		}
 	}
 	var query = 'INSERT INTO ' + prova2.tabella + '(' + campi + ')' + 'VALUES' + '(' + valori + ');' + out;
-	//res.send(query)
+
 	pool.query(query, async (error) => {
 		if (error) {
 			res.send(error + prova2.DB);
@@ -933,11 +1194,26 @@ app.post('/updatedbutente', async (req, res) => {
 });
 
 
-var server = app.listen(process.env.PORT, function () {
-	var host = server.address().address;
-	var port = server.address().port;
 
-	console.log('Example app listening at http://%s:%s', host, port);
+
+
+app.get('/stato_server', function (req, res) {
+	res.send('nodo: ' + process.env.NODE_ENV + ' \nistanza: ' + process.env.INSTANCE + ' \nporta: ' + process.env.PORT);
 });
 
-module.exports = server; // for testing
+app.post('/prima_risorsa_post', function (req, res) {
+	res.send('sono la prima risorsa POST su questo server');
+});
+
+app.get('/', (req,res) => {
+	res.redirect('/static/');
+})
+
+
+server.listen(process.env.PORT || 8081, () => {
+	// let host = server.address().address;
+	// let port = server.address().port;
+    console.log('Application (dbPlain) server listening') // at http://%s:%s', host, port
+});
+
+module.exports = server // for testing
