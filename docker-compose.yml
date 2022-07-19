@@ -19,20 +19,7 @@ services:
       - postgres  
     logging:
       driver: "none"
-
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_USER: prova
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8085:8080
+ 
 
   postgres:
     image: postgres

@@ -23,8 +23,7 @@ In particolare l'applicazione consente di gestire più database in contemporanea
 ### POSSIBILI SVILUPPI FUTURI 
 
 Per migliorare l'efficacia del prodotto, verrà implementata la possibilità di creare/eliminare tabelle tramite interfaccia, inoltre sarà possibile modificare le tabelle già esistenti e introdurre analisi di Data quality sui dati.
-Ulteriori sviluppi riguarderanno l'analisi dei dati tramite grafici e report, che permetteranno non solo la gestione ma anche lo studio di questi ultimi.
-In conclusione, lo sviluppo più ambizioso sarà quello di implementare tutte queste funzionalità non solo per i DB relazionali ma anche per ulteriori fonti di dati(file json,file csv, file xml, database NoSql) e l'opportunità di interconnettere queste fonti in un unico database.
+ Lo sviluppo più ambizioso sarà quello di implementare tutte queste funzionalità non solo per i DB relazionali ma anche per ulteriori fonti di dati(file json,file csv, file xml, database NoSql) e l'opportunità di interconnettere queste fonti in un unico database.
 
 <br>
 
@@ -47,8 +46,8 @@ In conclusione, lo sviluppo più ambizioso sarà quello di implementare tutte qu
 - Il servizio si interfaccia con tre API REST di terze parti:
   - Google (API commerciale): come login e per interfacciarsi al servizio Google Drive (tramite OAuth2);
   - [Chartjs](https://www.chartjs.org/): per la costruzione di grafici.
-<!-- - La soluzione deve prevedere l'uso di protocolli asincroni. Per esempio Websocket e/o AMQP (o simili es MQTT)
-- Il progetto deve prevedere l'uso di Docker e l'automazione del processo di lancio, configurazione e test -->
+- il progetto sviluppa delle websocket per lo scambio di dati con il server in particolare per la visualizzazione 
+  delle tabelle tramite chart.js e nel servizio responsabile per l'insert di nuove righe,per svilupparlo abbiamo utilizzato la libreria socket.io
 - CI/CD implementata tramite GitHub Action per unit tests, controllo delle performance (tramite Lighthouse fornito da Google) e controllo della security (in base alle vulnerabilità conosciute e a meccanismi di ML forniti da CodeQL) della web application.  
 - Sicurezza: Il servizio è accessibile tramite protocollo SSL self-signed, l'input dell'utente è controllato e lo scambio con le API commerciali avviene fornendo un esplicito Nonce (creato con il pacchetto `crypto` di Nodejs) che viene controllato durante lo scambio.  
 
