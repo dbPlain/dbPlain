@@ -29,7 +29,10 @@ Per migliorare l'efficacia del prodotto, verrà implementata la possibilità di 
 
 # ARCHITETTURA e TECNOLOGIE utilizzate
 
-<img src="schema_def.png" hspace="5" width="85%" style="padding-bottom:10px">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="schema.png">
+  <img hspace="5" width="85%" style="padding-bottom:10px" alt="schema" src="schema_chiaro.png">
+</picture>
 
 - Docker: utilizzato per creare l'ambiente di sviluppo dell'applicazione;
 - nginx: web server che gestisce la parte statica dell'applicazione; 
