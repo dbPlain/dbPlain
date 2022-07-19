@@ -5,6 +5,6 @@
     "template": {
         "withCompare": false
     },
-    "url" : "http://localhost:8080",
-    "sampleUrl" : "http://localhost:8080"
+    "url" : "https://localhost:8083",
+    "sampleUrl" : "https://localhost:8083"
 }

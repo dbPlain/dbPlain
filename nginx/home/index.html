@@ -329,7 +329,9 @@
          
         //variabile globali file  home
        
-        var socket = io.connect("http://localhost:8080")
+        var socket = io.connect("https://localhost:8083",{
+          withCredentials: true,
+        })
         socket.on("connesso", (arg) => {
             console.log('connesso: ' + arg)
         })
@@ -532,7 +534,7 @@
         
         }
           var richiestaDelete = new XMLHttpRequest()
-             richiestaDelete.open("post", "http://localhost:8080/deleteriga" , true)
+             richiestaDelete.open("post", "https://localhost:8083/deleteriga" , true)
              richiestaDelete.setRequestHeader("Content-Type", "application/json");
              richiestaDelete.onload = function()
              {
@@ -809,7 +811,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
           
           var richiesta =  new XMLHttpRequest()
         
-          richiesta.open("post", "http://localhost:8080/connessionedb" , true)
+          richiesta.open("post", "https://localhost:8083/connessionedb" , true)
           richiesta.setRequestHeader("Content-Type", "application/json");
           richiesta.onload = function(nomeDB){
            var response = richiesta.response  
@@ -820,7 +822,7 @@ function Connessionedb(hostDB, nomeDB , userDB , passwordDB, portDB){
                  if(!start){
                    
                    var richiestaSalvataggioDB =  new XMLHttpRequest()
-                   richiestaSalvataggioDB.open("post", "http://localhost:8080/updatedbutente" , true)
+                   richiestaSalvataggioDB.open("post", "https://localhost:8083/updatedbutente" , true)
                    richiestaSalvataggioDB.setRequestHeader("Content-Type", "application/json");
                    richiestaSalvataggioDB.onload = function(nomeDB){  
                     
@@ -892,7 +894,7 @@ function dropdowntabella(datiDataBase)
   db_selezionato_corrente = datiDataBase.DB
 
 var httpRequest = new XMLHttpRequest()
-httpRequest.open("post", "http://localhost:8080/tabelledb" , true)
+httpRequest.open("post", "https://localhost:8083/tabelledb" , true)
 httpRequest.setRequestHeader("Content-Type", "application/json");
          httpRequest.onload = function(){
             var response = httpRequest.response
@@ -943,7 +945,7 @@ httpRequest.setRequestHeader("Content-Type", "application/json");
 
      
                 var httpRequest3 = new XMLHttpRequest()
-                httpRequest3.open("post", "http://localhost:8080/selezionaDatiTabelladinamico" , true)
+                httpRequest3.open("post", "https://localhost:8083/selezionaDatiTabelladinamico" , true)
                 httpRequest3.setRequestHeader("Content-Type", "application/json");
                 httpRequest3.onload = function(){
                     

@@ -2,6 +2,8 @@ var request = require('request');
 var express = require('express');
 const app = express();
 const { Pool } = require('pg');
+const cors = require('cors');
+app.use(cors())
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,7 +25,14 @@ const utente = couchdb.db.use('utente');
 
 const http = require ('http')
 var server = http.createServer(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+	cors: {
+		origin: "https://localhost:8083",
+		methods: ["GET", "POST"],
+		allowedHeaders: ["my-custom-header"],
+		credentials: true
+	  }	
+});
 
 // Serving static files from "public" folder (documentazione api interne, '/apidoc')
 app.use(express.static(path.join(__dirname, 'public/')));
@@ -342,7 +351,7 @@ app.get('/uso_token/salvataggio/gdrive', googleDrive.Salva_su_Google_Drive, asyn
  *       "where": "matricola = '90909900'",
  *     }
  */
-app.get('/seleziona/dati/tabella/filtri', async (req, res) => {
+app.post('/seleziona/dati/tabella/filtri', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
 	const pool = new Pool({
@@ -356,8 +365,8 @@ app.get('/seleziona/dati/tabella/filtri', async (req, res) => {
 	
     
 	pool.query('select * from  ' + datiDB.tabella + ' where'+ where, function (err, res2) {
-		if (err) res.send(err)
-		res.send('ok ecco: ' + res2);
+		if (err) res.send(query)
+		res.send(res2);
 	});
 	pool.end(function (err) {
 		console.log('ehmmmm'+ err);
@@ -366,7 +375,7 @@ app.get('/seleziona/dati/tabella/filtri', async (req, res) => {
 
 
 /**
- * @api {get} /seleziona/dati/tabella Seleziona Tabella
+ * @api {post} /seleziona/dati/tabella Seleziona Tabella
  * @apiName Restituisce tutte le righe di una Tabella
  * @apiGroup Seleziona
  * 
@@ -404,7 +413,7 @@ app.get('/seleziona/dati/tabella/filtri', async (req, res) => {
  * 		..
  *    }]
  */
-app.get('/seleziona/dati/tabella', async (req, res) => {
+app.post('/seleziona/dati/tabella', async (req, res) => {
 	var dati = JSON.stringify(req.body);
 	var datiDB = JSON.parse(dati);
 
@@ -585,7 +594,7 @@ app.post('/insert/dati/tabella', async (req, res) => {
 			});
 			return;
 		} else {
-			res.status(400).send('ok');
+			res.status(200).send('ok');
 			pool.end(function (err) {
 				console.log(err);
 			});

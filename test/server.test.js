@@ -14,8 +14,8 @@ chai.use(chaiHttp);
 
 describe('Stato Server', () => {
 
-    describe('/GET selezionare una tabella senza dare abbastanza informazioni', () => {
-        it('GET ricevere messaggio: valori mancanti nella richiesta ', (done) => {
+    describe('/POST selezionare una tabella senza dare abbastanza informazioni', () => {
+        it('POST ricevere messaggio: valori mancanti nella richiesta ', (done) => {
             let infodb = {
                 "USER": "postgres",
                 "HOST": "postgres",
@@ -25,7 +25,7 @@ describe('Stato Server', () => {
                 // "tabella": "genio"
             }
             chai.request(server)
-            .get('/seleziona/dati/tabella')
+            .post('/seleziona/dati/tabella')
             .send(infodb)
             .end((err, res) => {
                 res.should.have.status(400);

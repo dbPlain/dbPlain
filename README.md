@@ -1,4 +1,4 @@
-<img height='100%' width='100%' src="./nginx/assets/img/logo+nome_readme.png"  hspace="5" vspace="7">
+<img height='100%' width='85%' src="./nginx/assets/img/logo+nome_readme.png"  hspace="5" vspace="7" style="padding-top:4px">
 
 ![Tests workflow](https://github.com/dbPlain/dbPlain/actions/workflows/security.yml/badge.svg)
 ![Security workflow](https://github.com/dbPlain/dbPlain/actions/workflows/CICD-tests.yml/badge.svg)
@@ -30,7 +30,7 @@ In conclusione, lo sviluppo più ambizioso sarà quello di implementare tutte qu
 
 # ARCHITETTURA e TECNOLOGIE utilizzate
 
-<!-- DA INSERIRE QUI LO SCHEMA <img src="prova2.png"> -->
+<img src="schema_def.png" hspace="5" width="85%" style="padding-bottom:10px">
 
 - Docker: utilizzato per creare l'ambiente di sviluppo dell'applicazione;
 - nginx: web server che gestisce la parte statica dell'applicazione; 
@@ -38,13 +38,12 @@ In conclusione, lo sviluppo più ambizioso sarà quello di implementare tutte qu
 - couchDb: database utilizzato per i dati utili al funzionamento dell'applicazione;
 - postgres sql: database relazionali per simulare i DB dell'utente da gestire;
 - bootstrap, jquery, ajax: librerie javascript e html/css che abbiamo adoperato lato client.
-<!-- - AGGIUNGERE BREVE SPIEGAZIONE WEBSOCKET  -->
 
 <br>
 
 # REQUISITI
 
-- API interne sono documentate e accessibili all'indirizzo `http://localhost:8080/apidoc` oppure in [questo file](server/public/apidoc/index.html).
+- API interne sono documentate e accessibili all'indirizzo `https://localhost:8083/apidoc` oppure in [questo file](server/public/apidoc/index.html).
 - Il servizio si interfaccia con tre API REST di terze parti:
   - Google (API commerciale): come login e per interfacciarsi al servizio Google Drive (tramite OAuth2);
   - [Chartjs](https://www.chartjs.org/): per la costruzione di grafici.
@@ -66,7 +65,7 @@ Prerequisiti: Docker, Docker-compose, Nodejs (e npm).
 5. per usare le API di google: inserire i campi opportuni nel file `.env.sample` e ridenominare il file in `.env` 
 
 Per avviare il progetto: `docker-compose up --build` [^shutdown]  
-Il servizio è ora accessibile all'indirizzo `http://localhost:8080/static/`  
+Il servizio è ora accessibile all'indirizzo `https://localhost:8083/static/`  
 
 All'interno dell'applicazione è possibile registrarsi o fare il login; successivamente sarà possibile gestire il proprio database in modo grafico e con agevoli bottoni. Diverse funzioni per la gestione del db sono inoltre disponibili tramite API.  
 Un database Postgres di prova è fornito dall'applicazione e accessibile all'indirizzo `http://localhost:8082/`: da qui è possibile verificare l'effettiva efficacia del servizio.     
